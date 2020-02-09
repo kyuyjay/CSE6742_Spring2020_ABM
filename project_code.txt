@@ -1,0 +1,277 @@
+{\rtf1\ansi\ansicpg936\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 globals [\
+  aircrafts\
+  ships\
+]\
+breed[tbd_devs tbd_dev]\
+turtles-own [\
+  v\
+  hp\
+  r_detect\
+  r_engage\
+  flee_thresh\
+  escape\
+  engaged\
+  flee\
+  offensive\
+  ship\
+  class\
+]\
+\
+\
+\
+breed[sbd_daunts sbd_daunt]\
+\
+breed[tbf_aves tbf_ave]\
+\
+\
+breed[b26s b26]\
+\
+\
+breed[b17s b17]\
+\
+\
+breed[f4fs f4f]\
+\
+\
+breed[f2as f2a]\
+\
+breed[b5ns b5n]\
+\
+breed[d3as d3a]\
+\
+breed[zeros zero]\
+\
+\
+breed[d4ys d4y]\
+\
+\
+breed[amagis amagi]\
+breed[tosas tosa]\
+breed[hiryus hiryu]\
+breed[soryus soryu]\
+breed[kongos konge]\
+breed[tones tone]\
+breed[nagaras natara]\
+breed[kageros kagero]\
+\
+\
+\
+to setup\
+  clear-all\
+  setup-patches\
+  init_var\
+  set aircrafts turtles with [ship = false]\
+  set ships turtles with [ship = true]\
+  reset-ticks\
+end\
+\
+to setup-patches\
+  ask patches [ set pcolor blue]\
+end\
+\
+to init_var\
+  print "init"\
+  create-sbd_daunts 3 [\
+    setxy -45 -45\
+    set color yellow\
+    set size 1\
+    set v 1\
+    set hp 10\
+    set r_detect 20\
+    set r_engage 5\
+    set flee_thresh 5\
+    set escape 50\
+    set engaged false\
+    set flee false\
+    set offensive true\
+    set ship false\
+    set class 0\
+    \
+    ]\
+  print [v] of sbd_daunts\
+  create-zeros 5 [\
+    setxy 0 -22\
+    set color green\
+    set size 1\
+    set v 1\
+    set hp 10\
+    set r_detect 15\
+    set r_engage 5\
+    set flee_thresh 5\
+    set escape 50\
+    set engaged false\
+    set flee false\
+    set offensive false\
+    set ship false\
+    set class 1\
+    ]\
+   create-f4fs 3 [\
+    setxy -47 -47 \
+    set color white\
+    set size 1\
+    set v 1\
+    set hp 10\
+    set r_detect 15\
+    set r_engage 5\
+    set flee_thresh 5\
+    set escape 50\
+    set engaged false\
+    set flee false\
+    set offensive true\
+    set ship false\
+    set class 1\
+    ]\
+  \
+  create-amagis 1 [\
+    setxy 0 0\
+    set color red\
+    set size 10\
+    set heading 270\
+    set ship true\
+    set class 0\
+    set hp 100\
+    set offensive false\
+  ]\
+  create-tosas 1 [\
+    setxy 0 12\
+    set size 10\
+    set color white\
+    set heading 270\
+    set ship true\
+    set class 0\
+    set hp 100\
+    set offensive false\
+  ]\
+  create-soryus 1 [\
+    setxy 0 -12\
+    set color pink\
+    set size 10 \
+    set heading 270\
+    set ship true\
+    set class 0\
+    set hp 100\
+    set offensive false\
+  ]\
+end\
+\
+\
+\
+to go \
+  disengage\
+  engage\
+  move\
+  ask ships [\
+    set label round hp\
+  ]\
+  ask turtles [\
+    if hp <= 0 [\
+      die\
+    ]\
+  ]\
+  tick\
+end\
+\
+to disengage\
+  print "disengage"\
+  let offense aircrafts with [offensive = true]\
+  ask offense with [engaged = true] [\
+    if hp < flee_thresh[\
+      set engaged false\
+      set flee true     \
+    ]\
+  ]\
+  ask offense with [flee = true] [\
+    set heading 180\
+    ifelse random 100 < escape [\
+      jump v\
+    ]\
+    [\
+      die\
+    ]\
+  ]\
+  print "disengaged"\
+end\
+\
+to engage\
+  print "engage"\
+  let offense aircrafts with [offensive = true]\
+  let free offense with [engaged = false and flee = false]\
+  ask offense with [engaged = true] [\
+    dogfight\
+  ]\
+  ask free [\
+    let defence_air aircrafts with [offensive = false]\
+    let defence_ship ships with [offensive = false]\
+    print "defence ship"\
+    print count defence_ship\
+    (ifelse count defence_air in-radius r_engage > 0 [\
+      dogfight\
+      set engaged true\
+    ]\
+    count defence_ship in-radius r_engage > 0 [\
+        print "attacking ship"\
+        let target min-one-of defence_ship [distance myself]\
+        if random 100 < 101 [\
+          print "bombing"\
+          ask target [\
+            set hp hp - 35\
+          ]\
+        ]\
+        if class = 0 [\
+          die\
+        ]      \
+    ])\
+  ]\
+  print "engaged"\
+end\
+\
+to move\
+  print "move"\
+  let offense aircrafts with [offensive = true]\
+  let defence aircrafts with [offensive = false]\
+  ask offense with [engaged = false and flee = false] [\
+    print "check disengaged"\
+    if class = 0 [\
+      face min-one-of ships [distance myself]\
+    ]\
+    if class = 1 [\
+      if count my-out-links = 0[      \
+        let detected defence in-radius r_detect\
+        let attacked detected with [count in-link-neighbors < 2]\
+        let help attacked with [count out-link-neighbors > 0]\
+        let selected detected\
+        ifelse any? help[\
+          set selected help\
+        ]\
+        [\
+          if any? attacked [\
+            set selected attacked\
+          ]\
+        ]\
+        if any? selected[\
+          create-link-to min-one-of selected [distance myself]\
+        ]\
+      ]\
+      ifelse any? out-link-neighbors [\
+        face one-of out-link-neighbors\
+      ]\
+      [\
+        let escorting offense with [class = 0]\
+        face min-one-of escorting [distance myself]\
+      ]\
+    ]\
+    jump v\
+  ]\
+  print "moved"\
+end\
+\
+to dogfight\
+  \
+end}
