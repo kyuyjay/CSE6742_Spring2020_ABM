@@ -1,9 +1,9 @@
 globals [
   aircrafts
   ships
-  breach_points
-  r_breach
   r_patrol
+  ship_detect_rad
+  percent_cap_commit
 ]
 breed[tbd_devs tbd_dev]
 turtles-own [
@@ -19,6 +19,8 @@ turtles-own [
   ship
   class
   state
+  breached
+  group
 ]
 
 
@@ -68,8 +70,9 @@ to setup
   set aircrafts turtles with [ship = false]
   set ships turtles with [ship = true]
   ;set breach_points turtles with [breach = true]
-  set r_breach 30
+  set ship_detect_rad 50
   set r_patrol 30
+  set percent_cap_commit 20
   reset-ticks
 end
 
@@ -94,7 +97,8 @@ to init_var
     set offensive true
     set ship false
     set class 0
-
+    set breached false
+    set group 0
     ]
   print [v] of sbd_daunts
   create-zeros 5 [
@@ -130,6 +134,8 @@ to init_var
     set offensive true
     set ship false
     set class 1
+    set breached false
+    set group 0
     ]
 
   create-amagis 1 [
@@ -279,18 +285,18 @@ to move
     jump v
   ]
 
-  ;check_commit_defence
+  check_commit_defence
   ; Hard coded rotating about point 0 for now
   ; will be fixed to average of all ships
-  ask defence with [state = "Patrol"][
+  ask defence with [state = "Patrol" and engaged = false and flee = false][
     if (distancexy 0 0) > r_patrol[
       face patch 0 0
     ]
     ifelse (distancexy 0 0) < r_patrol - 5[
-      ifelse xcor > 0 or ycor > 0[
-        set heading atan xcor ycor
-      ][
+      ifelse xcor = 0 and ycor = 0[
         set heading 45
+      ][
+        set heading atan xcor ycor
       ]
     ]
     [
@@ -300,7 +306,13 @@ to move
     ]
     jump v
   ]
-  ask defence with [state = "Investigate"][
+  ask defence with [state = "Investigate" and engaged = false and flee = false][
+    if count offense in-radius r_detect > 0[
+      set state "Intercept"
+    ]
+    if count offense with [(distancexy 0 0) < ship_detect_rad] = 0[
+      set state "Patrol"
+    ]
     jump v
   ]
   ask defence with [state = "Intercept" and engaged = false and flee = false][
@@ -333,12 +345,24 @@ to move
 end
 
 to check_commit_defence
-  ;let offense aircrafts with [offensive = true]
-  ;let active_offense offense with [(distancexy 0 0) < 120]
-  ;let unanswered_offense (list)
+  let offense aircrafts with [offensive = true]
+  let defence aircrafts with [offensive = false]
+  let new_offense offense with [(distancexy 0 0) < ship_detect_rad and breached = false]
 
-  ;let unanswered_offense active_offense with [breaches not in-radius r_breach]
-
+  if count new_offense > 0[
+    let rep one-of new_offense
+    let new_group [group] of rep
+    ask offense with[group = new_group][
+      set breached true
+    ]
+    let patroling defence with[state = "Patrol"]
+    let num_patroling count patroling
+    let num_sending round(num_patroling * percent_cap_commit / 100)
+    ask n-of num_sending patroling[
+      face rep
+      set state "Investigate"
+    ]
+  ]
 
 end
 
