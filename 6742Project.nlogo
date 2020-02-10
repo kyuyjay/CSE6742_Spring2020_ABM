@@ -325,7 +325,7 @@ to move
         face one-of out-link-neighbors
       ]
       [
-        set state = "Investigate"
+        set state "Investigate"
       ]
   ]
 
