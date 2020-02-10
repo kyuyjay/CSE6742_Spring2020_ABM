@@ -1,6 +1,9 @@
 globals [
   aircrafts
   ships
+  breach_points
+  r_breach
+  r_patrol
 ]
 breed[tbd_devs tbd_dev]
 turtles-own [
@@ -15,6 +18,7 @@ turtles-own [
   offensive
   ship
   class
+  state
 ]
 
 
@@ -54,6 +58,7 @@ breed[tones tone]
 breed[nagaras natara]
 breed[kageros kagero]
 
+breed[breaches breach]
 
 
 to setup
@@ -62,6 +67,9 @@ to setup
   init_var
   set aircrafts turtles with [ship = false]
   set ships turtles with [ship = true]
+  ;set breach_points turtles with [breach = true]
+  set r_breach 30
+  set r_patrol 30
   reset-ticks
 end
 
@@ -93,6 +101,7 @@ to init_var
     setxy 0 -22
     set color green
     set size 1
+    set heading 0
     set v 1
     set hp 10
     set r_detect 15
@@ -104,6 +113,7 @@ to init_var
     set offensive false
     set ship false
     set class 1
+    set state "Patrol"
     ]
    create-f4fs 3 [
     setxy -47 -47
@@ -131,6 +141,7 @@ to init_var
     set class 0
     set hp 100
     set offensive false
+    set r_detect 120
   ]
   create-tosas 1 [
     setxy 0 12
@@ -141,6 +152,7 @@ to init_var
     set class 0
     set hp 100
     set offensive false
+    set r_detect 120
   ]
   create-soryus 1 [
     setxy 0 -12
@@ -151,6 +163,7 @@ to init_var
     set class 0
     set hp 100
     set offensive false
+    set r_detect 120
   ]
 end
 
@@ -237,6 +250,7 @@ to move
     if class = 1 [
       if count my-out-links = 0[
         let detected defence in-radius r_detect
+        print(detected)
         let attacked detected with [count in-link-neighbors < 2]
         let help attacked with [count out-link-neighbors > 0]
         let selected detected
@@ -257,12 +271,75 @@ to move
       ]
       [
         let escorting offense with [class = 0]
-        face min-one-of escorting [distance myself]
+        if count escorting > 0[
+          face min-one-of escorting [distance myself]
+        ]
       ]
     ]
     jump v
   ]
+
+  ;check_commit_defence
+  ; Hard coded rotating about point 0 for now
+  ; will be fixed to average of all ships
+  ask defence with [state = "Patrol"][
+    if (distancexy 0 0) > r_patrol[
+      face patch 0 0
+    ]
+    ifelse (distancexy 0 0) < r_patrol - 5[
+      ifelse xcor > 0 or ycor > 0[
+        set heading atan xcor ycor
+      ][
+        set heading 45
+      ]
+    ]
+    [
+      let tanstuff atan xcor ycor
+      print tanstuff
+      set heading atan xcor ycor + 90
+    ]
+    jump v
+  ]
+  ask defence with [state = "Investigate"][
+    jump v
+  ]
+  ask defence with [state = "Intercept" and engaged = false and flee = false][
+    if count my-out-links = 0[
+        let detected offense in-radius r_detect
+        let attacked detected with [count in-link-neighbors < 2]
+        let help attacked with [count out-link-neighbors > 0]
+        let selected detected
+        ifelse any? help[
+          set selected help
+        ]
+        [
+          if any? attacked [
+            set selected attacked
+          ]
+        ]
+        if any? selected[
+          create-link-to min-one-of selected [distance myself]
+        ]
+      ]
+      ifelse any? out-link-neighbors [
+        face one-of out-link-neighbors
+      ]
+      [
+        set state = "Investigate"
+      ]
+  ]
+
   print "moved"
+end
+
+to check_commit_defence
+  ;let offense aircrafts with [offensive = true]
+  ;let active_offense offense with [(distancexy 0 0) < 120]
+  ;let unanswered_offense (list)
+
+  ;let unanswered_offense active_offense with [breaches not in-radius r_breach]
+
+
 end
 
 to dogfight
