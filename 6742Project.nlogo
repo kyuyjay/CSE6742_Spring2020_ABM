@@ -286,13 +286,18 @@ to move
   ]
 
   check_commit_defence
-  ; Hard coded rotating about point 0 for now
-  ; will be fixed to average of all ships
+  ; Patrol around the point 0,0
+  ;
   ask defence with [state = "Patrol" and engaged = false and flee = false][
+    ; If outside patrol radius
     if (distancexy 0 0) > r_patrol[
+      ;head towards radius
       face patch 0 0
     ]
+
+    ; if inside patrol radius ( hard coded tolerance )
     ifelse (distancexy 0 0) < r_patrol - 5[
+      ; Head towards radius
       ifelse xcor = 0 and ycor = 0[
         set heading 45
       ][
@@ -300,12 +305,16 @@ to move
       ]
     ]
     [
-      let tanstuff atan xcor ycor
-      print tanstuff
+      ; head in a circle using quickmaths
       set heading atan xcor ycor + 90
     ]
     jump v
   ]
+
+  ; Investigate state
+  ; Take the heading you have been set on, and
+  ; Proceed until no ships are left in ship radius, or
+  ; You enter detection range with a craft
   ask defence with [state = "Investigate" and engaged = false and flee = false][
     if count offense in-radius r_detect > 0[
       set state "Intercept"
@@ -315,6 +324,9 @@ to move
     ]
     jump v
   ]
+
+  ;This intercept state is a direct copy of the state used for offensive planes, with the
+  ; Added terminating condiion
   ask defence with [state = "Intercept" and engaged = false and flee = false][
     if count my-out-links = 0[
         let detected offense in-radius r_detect
@@ -332,29 +344,42 @@ to move
         if any? selected[
           create-link-to min-one-of selected [distance myself]
         ]
-      ]
-      ifelse any? out-link-neighbors [
-        face one-of out-link-neighbors
-      ]
-      [
-        set state "Investigate"
-      ]
+    ]
+    ifelse any? out-link-neighbors [
+      face one-of out-link-neighbors
+    ]
+    [
+      set state "Investigate"
+    ]
+   jump v
   ]
 
   print "moved"
 end
 
 to check_commit_defence
+  ;This method decides whether or not to commit the CAP
+  ; First it gets the offensive aircraft that have breached the ship visual
+  ;radius (started at center for now), but have not been marked as breached
+  ;
   let offense aircrafts with [offensive = true]
   let defence aircrafts with [offensive = false]
   let new_offense offense with [(distancexy 0 0) < ship_detect_rad and breached = false]
 
   if count new_offense > 0[
+    ; Take only the first one, one breach processed per tick
     let rep one-of new_offense
+
+    ;Once a breach is detected, we decide the entire group associated with the breach
+    ; is also seen. This simplifies the logic for now
     let new_group [group] of rep
+
+    ;Mark whole group as breached
     ask offense with[group = new_group][
       set breached true
     ]
+
+    ;Pick n patroling craft to address the breech
     let patroling defence with[state = "Patrol"]
     let num_patroling count patroling
     let num_sending round(num_patroling * percent_cap_commit / 100)
