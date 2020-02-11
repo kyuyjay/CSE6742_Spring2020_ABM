@@ -9,6 +9,9 @@ breed[tbd_devs tbd_dev]
 turtles-own [
   v
   hp
+  dmg
+  p_hit
+  p_evade
   r_detect
   r_engage
   flee_thresh
@@ -87,7 +90,10 @@ to init_var
     set color yellow
     set size 1
     set v 1
-    set hp 10
+    set hp 30
+    set dmg 1
+    set p_hit 2
+    set p_evade 1
     set r_detect 20
     set r_engage 5
     set flee_thresh 5
@@ -101,13 +107,16 @@ to init_var
     set group 0
     ]
   print [v] of sbd_daunts
-  create-zeros 5 [
+  create-zeros 6 [
     setxy 0 -22
     set color green
     set size 1
     set heading 0
     set v 1
     set hp 10
+    set dmg 6
+    set p_hit 7
+    set p_evade 8
     set r_detect 15
     set r_engage 5
     set flee_thresh 5
@@ -119,12 +128,15 @@ to init_var
     set class 1
     set state "Patrol"
     ]
-   create-f4fs 3 [
+   create-f4fs 6 [
     setxy -47 -47
     set color white
     set size 1
     set v 1
-    set hp 10
+    set hp 30
+    set dmg 3
+    set p_hit 3
+    set p_evade 3
     set r_detect 15
     set r_engage 5
     set flee_thresh 5
@@ -215,7 +227,7 @@ to engage
   print "engage"
   let offense aircrafts with [offensive = true]
   let free offense with [engaged = false and flee = false]
-  ask offense with [engaged = true] [
+  ask aircrafts with [engaged = true] [
     dogfight
   ]
   ask free [
@@ -239,7 +251,11 @@ to engage
         if class = 0 [
           die
         ]
-    ])
+    ]
+
+      [set engaged false]
+
+    )
   ]
   print "engaged"
 end
@@ -327,8 +343,10 @@ to move
 
   ;This intercept state is a direct copy of the state used for offensive planes, with the
   ; Added terminating condiion
+
   ask defence with [state = "Intercept" and engaged = false and flee = false][
     if count my-out-links = 0[
+      ; IF
         let detected offense in-radius r_detect
         let attacked detected with [count in-link-neighbors < 2]
         let help attacked with [count out-link-neighbors > 0]
@@ -345,12 +363,29 @@ to move
           create-link-to min-one-of selected [distance myself]
         ]
     ]
+
+
+    ; ELSE
+
+
+  if count out-link-neighbors in-radius r_engage > 0 or count in-link-neighbors in-radius r_engage > 0 [
+    dogfight
+    set engaged true
+  ]
+
+
+
+
+
+
     ifelse any? out-link-neighbors [
       face one-of out-link-neighbors
     ]
     [
       set state "Investigate"
     ]
+
+
    jump v
   ]
 
@@ -392,6 +427,36 @@ to check_commit_defence
 end
 
 to dogfight
+  print "dogfight"
+  ; this method simulated the dogfight phase between one or more aircraft
+
+  if any? out-link-neighbors [
+
+  let fighter_target out-link-neighbors with [class = 0]
+  let bomber_target out-link-neighbors with [class = 1]
+
+  let dmg_rec 0
+  let atk_dmg dmg
+  let p_hit_atk p_hit
+  let p_evade_def p_evade
+
+  ask one-of out-link-neighbors [
+
+    ; if targeting bomber, chance to be hit by defensive fire, no chance to evade
+    if any? bomber_target and (random 10 > p_hit)
+    [set dmg_rec random dmg]
+
+    ; if target evasion unsuccessful and hit successful, dmg dealt
+    if (random 10 > p_evade) and (random 10 <= p_hit_atk)  [set hp hp - random atk_dmg]
+
+
+  ]
+
+  set hp hp - dmg_rec
+
+  ]
+
+
 
 end
 @#$#@#$#@
@@ -440,10 +505,10 @@ NIL
 1
 
 BUTTON
-39
-100
+40
 102
-133
+103
+135
 NIL
 go
 T
