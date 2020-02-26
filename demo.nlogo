@@ -24,6 +24,8 @@ turtles-own [
   state
   breached
   group
+  gen_time
+  num_cap
 ]
 
 directed-link-breed [chases chase]
@@ -185,6 +187,8 @@ to init_var
     set hp 100
     set offensive false
     set r_detect 120
+    set gen_time 10
+    set num_cap 3
   ]
   create-tosas 1 [
     setxy 0 12
@@ -196,6 +200,8 @@ to init_var
     set hp 100
     set offensive false
     set r_detect 120
+    set gen_time 10
+    set num_cap 2
   ]
   create-soryus 1 [
     setxy 0 -12
@@ -207,6 +213,8 @@ to init_var
     set hp 100
     set offensive false
     set r_detect 120
+    set gen_time 10
+    set num_cap 1
   ]
 end
 
@@ -365,6 +373,7 @@ to move
   ; Take the heading you have been set on, and
   ; Proceed until no ships are left in ship radius, or
   ; You enter detection range with a craft
+
   ask defence with [state = "Investigate" and engaged = false and flee = false][
     if count offense in-radius r_detect > 0[
       set state "Intercept"
@@ -426,7 +435,7 @@ to move
 
     jump v
   ]
-
+  generate_cap
   print "moved"
 end
 
@@ -463,6 +472,52 @@ to check_commit_defence
   ]
 
 end
+
+to generate_cap
+  let launchable ships with [num_cap > 0]
+  let xlist (list)
+  let ylist (list)
+  ask launchable [
+    if ticks mod gen_time = 0[
+      print "hey"
+      let cap num_cap - 1
+      set num_cap cap
+      print "cap"
+      print cap
+      set xlist lput xcor xlist
+      set ylist lput ycor ylist
+    ]
+  ]
+  let indexer ( range 0 length xlist )
+
+  foreach indexer [ ind ->
+    let x item ind xlist
+    let y item ind ylist
+    create-zeros 1 [
+      setxy x y
+      set color green
+      set size 1
+      set heading 0
+      set v 1
+      set hp 10
+      set dmg 6
+      set p_hit 7
+      set p_evade 8
+      set r_detect 15
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive false
+      set ship false
+      set class 1
+      set state "Patrol"
+    ]
+  ]
+  set aircrafts turtles with [ship = false]
+end
+
 
 to dogfight
   print "dogfight"
