@@ -188,7 +188,7 @@ to init_var
     set offensive false
     set r_detect 120
     set gen_time 10
-    set num_cap 3
+    set num_cap 6
   ]
   create-tosas 1 [
     setxy 0 12
@@ -201,7 +201,7 @@ to init_var
     set offensive false
     set r_detect 120
     set gen_time 10
-    set num_cap 2
+    set num_cap 10
   ]
   create-soryus 1 [
     setxy 0 -12
@@ -214,7 +214,7 @@ to init_var
     set offensive false
     set r_detect 120
     set gen_time 10
-    set num_cap 1
+    set num_cap 6
   ]
 end
 
@@ -556,7 +556,6 @@ to dogfight
 end
 
 
-
 to add_waves
   let tick_rate 1 ; 1 Tick per minute (TODO make this a global)
   let wave_1 30 ; 8:22 am right now randomly selected time
@@ -609,9 +608,6 @@ to add_waves
     ]
     set aircrafts turtles with [ship = false]
   ]
-
-
-
 end
 
 
