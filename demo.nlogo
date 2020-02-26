@@ -83,7 +83,7 @@ to setup
   ;set breach_points turtles with [breach = true]
   set ship_detect_rad 50
   set r_patrol 30
-  set percent_cap_commit 20
+  set percent_cap_commit 50
   reset-ticks
 end
 
@@ -252,7 +252,7 @@ to go
 end
 
 to disengage
-  print "disengage"
+  ;print "disengage"
   let offense aircrafts with [offensive = true]
   ask offense with [engaged = true] [
     if hp < flee_thresh[
@@ -269,11 +269,11 @@ to disengage
       die
     ]
   ]
-  print "disengaged"
+ ; print "disengaged"
 end
 
 to engage
-  print "engage"
+  ;print "engage"
   let offense aircrafts with [offensive = true]
   let free offense with [engaged = false and flee = false]
   ; ask aircrafts with [engaged = true] [
@@ -282,7 +282,7 @@ to engage
   ask free [
     let defence_air aircrafts with [offensive = false]
     let defence_ship ships with [offensive = false]
-    print "defence ship"
+    ;print "defence ship"
     print count defence_ship
     (ifelse count defence_air in-radius r_engage > 0 [
       let target one-of defence_air in-radius r_engage
@@ -295,7 +295,7 @@ to engage
         print "attacking ship"
         let target min-one-of defence_ship [distance myself]
         if random 100 < 101 [
-          print "bombing"
+          ;print "bombing"
           ask target [
             set hp hp - 35
           ]
@@ -309,7 +309,7 @@ to engage
 
     )
   ]
-  print "engaged"
+  ;print "engaged"
 end
 
 to move
@@ -317,7 +317,7 @@ to move
   let offense aircrafts with [offensive = true]
   let defence aircrafts with [offensive = false]
   ask offense with [engaged = false and flee = false] [
-    print "check disengaged"
+   ; print "check disengaged"
     if class = 0 [
       face min-one-of ships [distance myself]
     ]
@@ -446,7 +446,7 @@ to move
     jump v
   ]
   generate_cap
-  print "moved"
+  ;print "moved"
 end
 
 to check_commit_defence
@@ -478,6 +478,7 @@ to check_commit_defence
     ask n-of num_sending patroling[
       face rep
       set state "Investigate"
+      print "New Investigators"
     ]
   ]
 
@@ -489,11 +490,8 @@ to generate_cap
   let ylist (list)
   ask launchable [
     if ticks mod gen_time = 0[
-      print "hey"
       let cap num_cap - 1
       set num_cap cap
-      print "cap"
-      print cap
       set xlist lput xcor xlist
       set ylist lput ycor ylist
     ]
@@ -583,9 +581,9 @@ end
 
 to add_waves
   let tick_rate 1 ; 1 Tick per minute (TODO make this a global)
-  let wave_1 30 ; 8:22 am right now randomly selected time
-  let wave_2 100 ; 9:22 am
-  if ticks = wave_1[
+  let wave_2 30 ; 8:22 am right now randomly selected time
+  let wave_3 100 ; 9:22 am
+  if ticks = wave_2[
     create-sbd_daunts 3 [
       setxy -45 -45
       set color yellow
@@ -605,11 +603,11 @@ to add_waves
       set ship false
       set class 0
       set breached false
-      set group 0
+      set group 3
     ]
     set aircrafts turtles with [ship = false]
   ]
-  if ticks = wave_2[
+  if ticks = wave_3[
     create-sbd_daunts 3 [
       setxy 45 45
       set color yellow
@@ -629,7 +627,7 @@ to add_waves
       set ship false
       set class 0
       set breached false
-      set group 0
+      set group 4
     ]
     create-sbd_daunts 3 [
       setxy 50 45
@@ -650,7 +648,7 @@ to add_waves
       set ship false
       set class 0
       set breached false
-      set group 0
+      set group 4
     ]
     create-f4fs 3 [
       setxy 52 47
@@ -671,7 +669,7 @@ to add_waves
       set ship false
       set class 1
       set breached false
-      set group 0
+      set group 4
     ]
 
     create-f4fs 3 [
@@ -693,7 +691,7 @@ to add_waves
       set ship false
       set class 1
       set breached false
-      set group 0
+      set group 4
     ]
     set aircrafts turtles with [ship = false]
   ]
