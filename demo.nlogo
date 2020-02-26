@@ -76,6 +76,17 @@ breed[breaches breach]
 
 to setup
   clear-all
+  set-default-shape sbd_daunts "airplane 2"
+  set-default-shape zeros "airplane 2"
+  set-default-shape f4fs "airplane 2"
+  set-default-shape amagis "boat top"
+  set-default-shape tosas "boat top"
+  set-default-shape soryus "boat top"
+  set-default-shape hiryus "boat top"
+  set-default-shape tones "boat top"
+  set-default-shape nagaras "boat top"
+  set-default-shape kageros "boat top"
+  set-default-shape kongos "boat top"
   setup-patches
   init_var
   set aircrafts turtles with [ship = false]
@@ -88,7 +99,7 @@ to setup
 end
 
 to setup-patches
-  ask patches [ set pcolor blue]
+  import-drawing "background.png"
 end
 
 to init_var
@@ -96,7 +107,7 @@ to init_var
   create-sbd_daunts 3 [
     setxy -45 -45
     set color yellow
-    set size 1
+    set size 3
     set v 1
     set hp 30
     set dmg 1
@@ -117,7 +128,7 @@ to init_var
   create-sbd_daunts 3 [
     setxy 45 45
     set color yellow
-    set size 1
+    set size 3
     set v 1
     set hp 30
     set dmg 1
@@ -139,7 +150,7 @@ to init_var
   create-zeros 6 [
     setxy 0 -22
     set color green
-    set size 1
+    set size 3
     set heading 0
     set v 1
     set hp 10
@@ -160,7 +171,7 @@ to init_var
    create-f4fs 6 [
     setxy -47 -47
     set color white
-    set size 1
+    set size 3
     set v 1
     set hp 30
     set dmg 3
@@ -180,9 +191,9 @@ to init_var
     ]
 
   create-amagis 1 [
-    setxy 0 0
+    setxy 0 6
     set color red
-    set size 10
+    set size 8
     set heading 270
     set ship true
     set class 0
@@ -191,12 +202,13 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 6
-    set r_ship_antiair 10
+    set r_ship_antiair 30
     set attack_per_tick 1
+    set p_hit 1
   ]
   create-tosas 1 [
-    setxy 0 12
-    set size 10
+    setxy 0 -6
+    set size 8
     set color white
     set heading 270
     set ship true
@@ -206,13 +218,14 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 10
-    set r_ship_antiair 10
+    set r_ship_antiair 30
     set attack_per_tick 1
+    set p_hit 1
   ]
   create-soryus 1 [
-    setxy 0 -12
+    setxy -12 -6
     set color pink
-    set size 10
+    set size 8
     set heading 270
     set ship true
     set class 0
@@ -221,8 +234,84 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 6
-    set r_ship_antiair 10
+    set r_ship_antiair 30
     set attack_per_tick 1
+    set p_hit 1
+  ]
+
+  create-hiryus 1 [
+    setxy -12 6
+    set color orange
+    set size 8
+    set heading 270
+    set ship true
+    set class 0
+    set hp 100
+    set offensive false
+    set r_detect 120
+    set gen_time 10
+    set num_cap 6
+    set r_ship_antiair 30
+    set attack_per_tick 1
+    set p_hit 1
+  ]
+
+  create-kongos 1 [
+    setxy -10 -30
+    set color grey
+    set size 5
+    set heading 270
+    set ship true
+    set class 1
+    set hp 100
+    set offensive false
+    set r_detect 120
+    set r_ship_antiair 30
+    set attack_per_tick 1
+    set p_hit 1
+  ]
+  create-tones 1 [
+    setxy -10 30
+    set color grey
+    set size 5
+    set heading 270
+    set ship true
+    set class 1
+    set hp 100
+    set offensive false
+    set r_detect 120
+    set r_ship_antiair 30
+    set attack_per_tick 1
+    set p_hit 1
+  ]
+  create-nagaras 1 [
+    setxy -23 -25
+    set color grey
+    set size 5
+    set heading 270
+    set ship true
+    set class 1
+    set hp 100
+    set offensive false
+    set r_detect 120
+    set r_ship_antiair 30
+    set attack_per_tick 1
+    set p_hit 1
+  ]
+
+  create-kageros 1 [
+    setxy -23 25
+    set color grey
+    set size 5
+    set heading 270
+    set ship true
+    set class 1
+    set hp 100
+    set offensive false
+    set r_detect 120
+    set r_ship_antiair 30
+    set attack_per_tick 1
+    set p_hit 1
   ]
 end
 
@@ -319,7 +408,8 @@ to move
   ask offense with [engaged = false and flee = false] [
    ; print "check disengaged"
     if class = 0 [
-      face min-one-of ships [distance myself]
+      let carriers ships with [class = 0]
+      face min-one-of carriers [distance myself]
     ]
     if class = 1 [
       if count my-out-chases = 0[
@@ -358,24 +448,27 @@ to move
   ;
   ask defence with [state = "Patrol" and engaged = false and flee = false][
     ; If outside patrol radius
-    if (distancexy 0 0) > r_patrol[
+    ifelse (distancexy 0 0) > r_patrol[
       ;head towards radius
       face patch 0 0
     ]
-
-    ; if inside patrol radius ( hard coded tolerance )
-    ifelse (distancexy 0 0) < r_patrol - 5[
-      ; Head towards radius
-      ifelse xcor = 0 and ycor = 0[
-        set heading 45
-      ][
-        set heading atan xcor ycor
+    [
+      ; if inside patrol radius ( hard coded tolerance )
+      ifelse (distancexy 0 0) < r_patrol - 5[
+        ; Head towards radius
+        ifelse xcor = 0 and ycor = 0[
+          set heading 45
+        ][
+          set heading atan xcor ycor
+        ]
+      ]
+      [
+        ; head in a circle using quickmaths
+        set heading atan xcor ycor + 90
       ]
     ]
-    [
-      ; head in a circle using quickmaths
-      set heading atan xcor ycor + 90
-    ]
+
+
     jump v
   ]
 
@@ -475,6 +568,7 @@ to check_commit_defence
     let patroling defence with[state = "Patrol"]
     let num_patroling count patroling
     let num_sending round(num_patroling * percent_cap_commit / 100)
+    print(num_sending)
     ask n-of num_sending patroling[
       face rep
       set state "Investigate"
@@ -504,7 +598,7 @@ to generate_cap
     create-zeros 1 [
       setxy x y
       set color green
-      set size 1
+      set size 3
       set heading 0
       set v 1
       set hp 10
@@ -571,8 +665,10 @@ to track_AA_damage
   ask ships [
     let ship_attack attack_per_tick
     ask offense in-radius r_ship_antiair[
-      let newhp hp - ship_attack
-      set hp newhp
+      if random 10 > p_hit[
+        let newhp hp - ship_attack
+        set hp newhp
+      ]
     ]
   ]
 
@@ -583,11 +679,12 @@ to add_waves
   let tick_rate 1 ; 1 Tick per minute (TODO make this a global)
   let wave_2 30 ; 8:22 am right now randomly selected time
   let wave_3 100 ; 9:22 am
+  let wave_4 150 ; 9:22 am
   if ticks = wave_2[
     create-sbd_daunts 3 [
       setxy -45 -45
       set color yellow
-      set size 1
+      set size 3
       set v 1
       set hp 30
       set dmg 1
@@ -608,10 +705,69 @@ to add_waves
     set aircrafts turtles with [ship = false]
   ]
   if ticks = wave_3[
+
+     let indexer ( range 0 7 )
+    let bombIndexer ( range 0 10 )
+
+    foreach bombIndexer [ ind ->
+      let ycoord (45 + 1 * ind)
+      let xcoord (-45 + 2 * ind)
+      create-sbd_daunts 1 [
+        setxy xcoord ycoord
+        set color yellow
+        set size 3
+        set v 1
+        set hp 30
+        set dmg 1
+        set p_hit 2
+        set p_evade 1
+        set r_detect 20
+        set r_engage 5
+        set flee_thresh 5
+        set escape 50
+        set engaged false
+        set flee false
+        set offensive true
+        set ship false
+        set class 0
+        set breached false
+        set group 4
+      ]
+    ]
+    foreach indexer [ ind ->
+      let ycoord (45 + 1 * ind)
+      let xcoord (-52 + 2 * ind)
+      create-f4fs 1 [
+        setxy xcoord ycoord
+        set color white
+        set size 3
+        set v 1
+        set hp 30
+        set dmg 3
+        set p_hit 3
+        set p_evade 3
+        set r_detect 15
+        set r_engage 5
+        set flee_thresh 5
+        set escape 50
+        set engaged false
+        set flee false
+        set offensive true
+        set ship false
+        set class 1
+        set breached false
+        set group 4
+      ]
+    ]
+    set aircrafts turtles with [ship = false]
+
+  ]
+
+  if ticks = wave_4[
     create-sbd_daunts 3 [
-      setxy 45 45
+      setxy 32 45
       set color yellow
-      set size 1
+      set size 3
       set v 1
       set hp 30
       set dmg 1
@@ -630,9 +786,9 @@ to add_waves
       set group 4
     ]
     create-sbd_daunts 3 [
-      setxy 50 45
+      setxy 36 45
       set color yellow
-      set size 1
+      set size 3
       set v 1
       set hp 30
       set dmg 1
@@ -650,10 +806,31 @@ to add_waves
       set breached false
       set group 4
     ]
-    create-f4fs 3 [
-      setxy 52 47
+    create-sbd_daunts 2 [
+      setxy 32 45
+      set color yellow
+      set size 3
+      set v 1
+      set hp 30
+      set dmg 1
+      set p_hit 2
+      set p_evade 1
+      set r_detect 20
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 0
+      set breached false
+      set group 4
+    ]
+    create-f4fs 2 [
+      setxy 32 32
       set color white
-      set size 1
+      set size 3
       set v 1
       set hp 30
       set dmg 3
@@ -671,11 +848,10 @@ to add_waves
       set breached false
       set group 4
     ]
-
-    create-f4fs 3 [
-      setxy 47 47
+    create-f4fs 2 [
+      setxy 32 47
       set color white
-      set size 1
+      set size 3
       set v 1
       set hp 30
       set dmg 3
@@ -694,6 +870,7 @@ to add_waves
       set group 4
     ]
     set aircrafts turtles with [ship = false]
+
   ]
 end
 
@@ -761,6 +938,25 @@ NIL
 NIL
 1
 
+PLOT
+764
+10
+1207
+226
+Planes
+NIL
+NIL
+0.0
+20.0
+0.0
+20.0
+true
+true
+"" ""
+PENS
+"Japanese CAP" 1.0 0 -15456499 true "" "plot count zeros"
+"American Planes" 1.0 0 -7858858 true "" "plot count turtles with [offensive = true] "
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -808,10 +1004,33 @@ true
 0
 Polygon -7500403 true true 150 0 135 15 120 60 120 105 15 165 15 195 120 180 135 240 105 270 120 285 150 270 180 285 210 270 165 240 180 180 285 195 285 165 180 105 180 60 165 15
 
+airplane 2
+true
+0
+Polygon -7500403 true true 150 26 135 30 120 60 120 90 18 105 15 135 120 150 120 165 135 210 135 225 150 285 165 225 165 210 180 165 180 150 285 135 282 105 180 90 180 60 165 30
+Line -7500403 false 120 30 180 30
+Polygon -7500403 true true 105 255 120 240 180 240 195 255 180 270 120 270
+
 arrow
 true
 0
 Polygon -7500403 true true 150 0 0 150 105 150 105 293 195 293 195 150 300 150
+
+boat top
+true
+0
+Polygon -7500403 true true 150 1 137 18 123 46 110 87 102 150 106 208 114 258 123 286 175 287 183 258 193 209 198 150 191 87 178 46 163 17
+Rectangle -16777216 false false 129 92 170 178
+Rectangle -16777216 false false 120 63 180 93
+Rectangle -7500403 true true 133 89 165 165
+Polygon -11221820 true false 150 60 105 105 150 90 195 105
+Polygon -16777216 false false 150 60 105 105 150 90 195 105
+Rectangle -16777216 false false 135 178 165 262
+Polygon -16777216 false false 134 262 144 286 158 286 166 262
+Line -16777216 false 129 149 171 149
+Line -16777216 false 166 262 188 252
+Line -16777216 false 134 262 112 252
+Line -16777216 false 150 2 149 62
 
 box
 false
