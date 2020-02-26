@@ -225,6 +225,7 @@ to go
   engage
   dogfight
   move
+  add_waves
   ask ships [
     set label round hp
   ]
@@ -553,6 +554,68 @@ to dogfight
 
   ]
 end
+
+
+
+to add_waves
+  let tick_rate 1 ; 1 Tick per minute (TODO make this a global)
+  let wave_1 30 ; 8:22 am right now randomly selected time
+  let wave_2 100 ; 9:22 am
+  if ticks = wave_1[
+    create-sbd_daunts 3 [
+      setxy -45 -45
+      set color yellow
+      set size 1
+      set v 1
+      set hp 30
+      set dmg 1
+      set p_hit 2
+      set p_evade 1
+      set r_detect 20
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 0
+      set breached false
+      set group 0
+    ]
+    set aircrafts turtles with [ship = false]
+  ]
+  if ticks = wave_2[
+    create-sbd_daunts 3 [
+      setxy 45 45
+      set color yellow
+      set size 1
+      set v 1
+      set hp 30
+      set dmg 1
+      set p_hit 2
+      set p_evade 1
+      set r_detect 20
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 0
+      set breached false
+      set group 0
+    ]
+    set aircrafts turtles with [ship = false]
+  ]
+
+
+
+end
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
