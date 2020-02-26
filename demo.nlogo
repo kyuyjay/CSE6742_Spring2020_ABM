@@ -26,6 +26,8 @@ turtles-own [
   group
   gen_time
   num_cap
+  attack_per_tick
+  r_ship_antiair
 ]
 
 directed-link-breed [chases chase]
@@ -189,6 +191,8 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 6
+    set r_ship_antiair 10
+    set attack_per_tick 1
   ]
   create-tosas 1 [
     setxy 0 12
@@ -202,6 +206,8 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 10
+    set r_ship_antiair 10
+    set attack_per_tick 1
   ]
   create-soryus 1 [
     setxy 0 -12
@@ -215,6 +221,8 @@ to init_var
     set r_detect 120
     set gen_time 10
     set num_cap 6
+    set r_ship_antiair 10
+    set attack_per_tick 1
   ]
 end
 
@@ -226,6 +234,7 @@ to go
   dogfight
   move
   add_waves
+  track_AA_damage
   ask ships [
     set label round hp
   ]
@@ -555,6 +564,22 @@ to dogfight
   ]
 end
 
+; Really basic Anti Air Behavior, this is
+; Super broken, and like crazt powerfuly
+; cause it hits all of them
+; But this is temp
+to track_AA_damage
+  let offense aircrafts with [offensive = true]
+  ask ships [
+    let ship_attack attack_per_tick
+    ask offense in-radius r_ship_antiair[
+      let newhp hp - ship_attack
+      set hp newhp
+    ]
+  ]
+
+
+end
 
 to add_waves
   let tick_rate 1 ; 1 Tick per minute (TODO make this a global)
@@ -603,6 +628,70 @@ to add_waves
       set offensive true
       set ship false
       set class 0
+      set breached false
+      set group 0
+    ]
+    create-sbd_daunts 3 [
+      setxy 50 45
+      set color yellow
+      set size 1
+      set v 1
+      set hp 30
+      set dmg 1
+      set p_hit 2
+      set p_evade 1
+      set r_detect 20
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 0
+      set breached false
+      set group 0
+    ]
+    create-f4fs 3 [
+      setxy 52 47
+      set color white
+      set size 1
+      set v 1
+      set hp 30
+      set dmg 3
+      set p_hit 3
+      set p_evade 3
+      set r_detect 15
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 1
+      set breached false
+      set group 0
+    ]
+
+    create-f4fs 3 [
+      setxy 47 47
+      set color white
+      set size 1
+      set v 1
+      set hp 30
+      set dmg 3
+      set p_hit 3
+      set p_evade 3
+      set r_detect 15
+      set r_engage 5
+      set flee_thresh 5
+      set escape 50
+      set engaged false
+      set flee false
+      set offensive true
+      set ship false
+      set class 1
       set breached false
       set group 0
     ]
