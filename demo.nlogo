@@ -146,7 +146,7 @@ to init_var
     set breached false
     set group 0
     ]
-  print [v] of sbd_daunts
+  ;print [v] of sbd_daunts
   create-zeros 6 [
     setxy 0 -22
     set color green
@@ -372,7 +372,7 @@ to engage
     let defence_air aircrafts with [offensive = false]
     let defence_ship ships with [offensive = false]
     ;print "defence ship"
-    print count defence_ship
+    ;print count defence_ship
     (ifelse count defence_air in-radius r_engage > 0 [
       let target one-of defence_air in-radius r_engage
       set engaged true
@@ -381,7 +381,7 @@ to engage
       ; dogfight
     ]
     count defence_ship in-radius r_engage > 0 [
-        print "attacking ship"
+        ;print "attacking ship"
         let target min-one-of defence_ship [distance myself]
         if random 100 < 101 [
           ;print "bombing"
@@ -402,7 +402,7 @@ to engage
 end
 
 to move
-  print "move"
+  ;print "move"
   let offense aircrafts with [offensive = true]
   let defence aircrafts with [offensive = false]
   ask offense with [engaged = false and flee = false] [
@@ -414,7 +414,7 @@ to move
     if class = 1 [
       if count my-out-chases = 0[
         let detected defence in-radius r_detect
-        print(detected)
+        ;print(detected)
         let attacked detected with [count in-chase-neighbors < 2]
         let help attacked with [count out-chase-neighbors > 0]
         let selected detected
@@ -568,11 +568,11 @@ to check_commit_defence
     let patroling defence with[state = "Patrol"]
     let num_patroling count patroling
     let num_sending round(num_patroling * percent_cap_commit / 100)
-    print(num_sending)
+    ;print(num_sending)
     ask n-of num_sending patroling[
       face rep
       set state "Investigate"
-      print "New Investigators"
+      ;print "New Investigators"
     ]
   ]
 
@@ -622,7 +622,7 @@ end
 
 
 to dogfight
-  print "dogfight"
+  ;print "dogfight"
   ; this method simulated the dogfight phase between one or more aircraft
   ask battles [
 
@@ -710,8 +710,66 @@ to add_waves
     let bombIndexer ( range 0 10 )
 
     foreach bombIndexer [ ind ->
+      let ycoord (-24 + 1 * ind)
+      let xcoord (35 + 2 * ind)
+      create-sbd_daunts 1 [
+        setxy xcoord ycoord
+        set color yellow
+        set size 3
+        set v 1
+        set hp 30
+        set dmg 1
+        set p_hit 2
+        set p_evade 1
+        set r_detect 20
+        set r_engage 5
+        set flee_thresh 5
+        set escape 50
+        set engaged false
+        set flee false
+        set offensive true
+        set ship false
+        set class 0
+        set breached false
+        set group 3
+      ]
+    ]
+    foreach indexer [ ind ->
+      let ycoord (-30 + 1 * ind)
+      let xcoord (32 + 2 * ind)
+      create-f4fs 1 [
+        setxy xcoord ycoord
+        set color white
+        set size 3
+        set v 1
+        set hp 30
+        set dmg 3
+        set p_hit 3
+        set p_evade 3
+        set r_detect 15
+        set r_engage 5
+        set flee_thresh 5
+        set escape 50
+        set engaged false
+        set flee false
+        set offensive true
+        set ship false
+        set class 1
+        set breached false
+        set group 3
+      ]
+    ]
+    set aircrafts turtles with [ship = false]
+
+  ]
+
+  if ticks = wave_4[
+    let indexer ( range 0 7 )
+    let bombIndexer ( range 0 10 )
+
+    foreach bombIndexer [ ind ->
       let ycoord (45 + 1 * ind)
-      let xcoord (-45 + 2 * ind)
+      let xcoord (52 + 2 * ind)
       create-sbd_daunts 1 [
         setxy xcoord ycoord
         set color yellow
@@ -736,7 +794,7 @@ to add_waves
     ]
     foreach indexer [ ind ->
       let ycoord (45 + 1 * ind)
-      let xcoord (-52 + 2 * ind)
+      let xcoord (48 + 2 * ind)
       create-f4fs 1 [
         setxy xcoord ycoord
         set color white
@@ -758,116 +816,6 @@ to add_waves
         set breached false
         set group 4
       ]
-    ]
-    set aircrafts turtles with [ship = false]
-
-  ]
-
-  if ticks = wave_4[
-    create-sbd_daunts 3 [
-      setxy 32 45
-      set color yellow
-      set size 3
-      set v 1
-      set hp 30
-      set dmg 1
-      set p_hit 2
-      set p_evade 1
-      set r_detect 20
-      set r_engage 5
-      set flee_thresh 5
-      set escape 50
-      set engaged false
-      set flee false
-      set offensive true
-      set ship false
-      set class 0
-      set breached false
-      set group 4
-    ]
-    create-sbd_daunts 3 [
-      setxy 36 45
-      set color yellow
-      set size 3
-      set v 1
-      set hp 30
-      set dmg 1
-      set p_hit 2
-      set p_evade 1
-      set r_detect 20
-      set r_engage 5
-      set flee_thresh 5
-      set escape 50
-      set engaged false
-      set flee false
-      set offensive true
-      set ship false
-      set class 0
-      set breached false
-      set group 4
-    ]
-    create-sbd_daunts 2 [
-      setxy 32 45
-      set color yellow
-      set size 3
-      set v 1
-      set hp 30
-      set dmg 1
-      set p_hit 2
-      set p_evade 1
-      set r_detect 20
-      set r_engage 5
-      set flee_thresh 5
-      set escape 50
-      set engaged false
-      set flee false
-      set offensive true
-      set ship false
-      set class 0
-      set breached false
-      set group 4
-    ]
-    create-f4fs 2 [
-      setxy 32 32
-      set color white
-      set size 3
-      set v 1
-      set hp 30
-      set dmg 3
-      set p_hit 3
-      set p_evade 3
-      set r_detect 15
-      set r_engage 5
-      set flee_thresh 5
-      set escape 50
-      set engaged false
-      set flee false
-      set offensive true
-      set ship false
-      set class 1
-      set breached false
-      set group 4
-    ]
-    create-f4fs 2 [
-      setxy 32 47
-      set color white
-      set size 3
-      set v 1
-      set hp 30
-      set dmg 3
-      set p_hit 3
-      set p_evade 3
-      set r_detect 15
-      set r_engage 5
-      set flee_thresh 5
-      set escape 50
-      set engaged false
-      set flee false
-      set offensive true
-      set ship false
-      set class 1
-      set breached false
-      set group 4
     ]
     set aircrafts turtles with [ship = false]
 
