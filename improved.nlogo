@@ -3,6 +3,7 @@ extensions [matrix array]
 globals [
   aircrafts
   ships
+  p-manu
   p-hit
   p-dmg
   idx_tbd_devs
@@ -252,6 +253,31 @@ to setup-plane-data
 end
 
 to setup-p
+  set p-manu matrix:from-row-list [
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];0 tbd_devs
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];1 sbd_daunts
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];2 tbf_aves
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];3 b26s
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];4 b17s
+                              [1 1 1 1 1 1 1 1 1 1 0.5 0.6 1 0.1 1 1 1 1 1 1 1 1];5 f4fs
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];6 f2as
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];7 yorktowns
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];8 acruisers
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];9 adestroyers
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];10 d3as
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];11 b5ns
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];12 d4ys
+                              [0.8 0.5 0.6 0.9 0.95 0.3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];13 zeros
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];14 amagis
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];15 tosas
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];16 hiryus
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];17 soryus
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];18 kongos
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];19 tones
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];20 nagaras
+                              [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1];21 kageros
+                                                                                       ]
+
   set p-hit matrix:from-row-list [
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 30 1 0 1 1 1 1 1 1];0 tbd_devs
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 30 20 0 20 20 0 0 0 0];1 sbd_daunts
@@ -822,10 +848,17 @@ to engage
       let target min-one-of defence_ship [distance myself]
       print matrix:get p-hit idx [idx] of target
       if random 100 < (matrix:get p-hit idx [idx] of target) [
-        print "bombing"
-        let dmg random (matrix:get p-dmg idx [idx] of target) * [max_hp] of target / 100
+        ; Triangular Distribution
+        let dmg 0
+        let F (matrix:get p-dmg idx [idx] of target) / 100
+        let U random-float 1
+        ifelse U < F [
+          set dmg sqrt (U * 100 * (matrix:get p-dmg idx [idx] of target))
+        ] [
+          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg idx [idx] of target)))
+        ]
         ask target [
-          set hp hp - dmg
+          set hp hp - (dmg * [max_hp] of target / 100)
         ]
       ]
       if class = 0 [
@@ -1154,18 +1187,29 @@ to dogfight
     let attacker_id [idx] of attacker
     ask defender [
       ; if target evasion unsuccessful and hit successful and there is still amunition, dmg dealt
-      if (random 100 < matrix:get p-hit [idx] of attacker idx) and (attacker_m_gun > 0 or attacker_cannon > 0)[
-        ; multiplier for ammunition
-        let mult 1
-        if attacker_cannon <= 0 [
-          set mult 1;item attacker_id machine-gun-mult
+      if (random 100 < matrix:get p-manu [idx] of attacker idx) [
+        if (random 100 < matrix:get p-hit [idx] of attacker idx) and (attacker_m_gun > 0 or attacker_cannon > 0)[
+          ; multiplier for ammunition
+          let mult 1
+          if attacker_cannon <= 0 [
+            set mult 1;item attacker_id machine-gun-mult
+          ]
+          ; Triangular Distribution
+          let dmg 0
+          let F (matrix:get p-dmg [idx] of attacker idx) / 100
+          let U random-float 1
+          ifelse U < F [
+            set dmg sqrt (U * 100 * (matrix:get p-dmg [idx] of attacker idx))
+          ] [
+            set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg [idx] of attacker idx)))
+          ]
+          let hp_loss mult * dmg * max_hp / 100
+          set hp hp - hp_loss
         ]
-        let hp_loss mult * random (matrix:get p-dmg [idx] of attacker idx) * max_hp / 100
-        set hp hp - hp_loss
         ask attacker [
-          print(machine_gun_time)
-          set machine_gun_time machine_gun_time - burst_time
-          set cannon_fire_time cannon_fire_time - burst_time
+            print(machine_gun_time)
+            set machine_gun_time machine_gun_time - burst_time
+            set cannon_fire_time cannon_fire_time - burst_time
         ]
       ]
     ]
@@ -1488,9 +1532,9 @@ to add_midway_waves
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-211
+210
 10
-2224
+2223
 524
 -1
 -1
@@ -1557,7 +1601,7 @@ toa
 toa
 0
 100
-38.0
+100.0
 1
 1
 NIL
