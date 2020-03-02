@@ -244,7 +244,7 @@ to setup-plane-data
   ]
 
   ; Filler numbers for now
-  set machine-gun-mult [1 1 1 1 1 .1 .1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
+  set machine-gun-mult [1 1 1 1 1 1 1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
   set machine-gun-time [50 50 50 50 50 40 40 0 0 0 50 50 50 41 0 0 0 0 0 0 0 0]
   set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 7 0 0 0 0 0 0 0 0]
   set burst-time [1.5 1.5 1.5 1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 0 0 0 0 0]
@@ -761,27 +761,22 @@ to go
     ]
   ]
   kill_planes_range
+  ask motherships [hide-link]
   tick
 end
 
 to disengage
   ;print "disengage"
   let offense aircrafts with [offensive = true]
-  ask offense with [engaged = true] [
+  ask offense [
   ;TODO change logic for bombers? Since bombers should not try to disengage if they uhm dont have anything to worry about
   ; ADD in logic for flight ranger here maybe?
-  if hp < flee_thresh or (machine_gun_time <= 0 and cannon_fire_time <= 0)[
+  if hp < flee_thresh or (machine_gun_time <= 0 and cannon_fire_time <= 0) or flee = true[
     set engaged false
     set flee true
-    ]
-  ]
-  ask offense with [flee = true] [
-    ifelse random 100 < p_escape [
-      set heading 180
-      jump v
-    ]
-    [
-      die
+    if random 100 > p_escape and class = 1[
+        die
+      ]
     ]
   ]
 end
@@ -825,8 +820,9 @@ to engage
       print"bombs"
       ;print "attacking ship"
       let target min-one-of defence_ship [distance myself]
+      print matrix:get p-hit idx [idx] of target
       if random 100 < (matrix:get p-hit idx [idx] of target) [
-        ;print "bombing"
+        print "bombing"
         let dmg random (matrix:get p-dmg idx [idx] of target) * [max_hp] of target / 100
         ask target [
           set hp hp - dmg
@@ -1167,6 +1163,7 @@ to dogfight
         let hp_loss mult * random (matrix:get p-dmg [idx] of attacker idx) * max_hp / 100
         set hp hp - hp_loss
         ask attacker [
+          print(machine_gun_time)
           set machine_gun_time machine_gun_time - burst_time
           set cannon_fire_time cannon_fire_time - burst_time
         ]
@@ -1491,9 +1488,9 @@ to add_midway_waves
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
+211
 10
-2223
+2224
 524
 -1
 -1
@@ -1560,7 +1557,7 @@ toa
 toa
 0
 100
-56.0
+38.0
 1
 1
 NIL
