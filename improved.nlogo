@@ -379,6 +379,12 @@ to init-jap-fleet
     set american false
     ; Defence
     set defence_state "Patrol"
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
+    ;flight-speed-patches
   ]
   ; Carriers
   create-amagis 1 [
@@ -669,6 +675,11 @@ to midway-wave
     set breached false
     set group 0
     set idx idx_f4fs
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
     ]
   create-sbd_daunts 3 [
     setxy -45 -45
@@ -688,6 +699,11 @@ to midway-wave
     set breached false
     set group 0
     set idx idx_sbd_daunts
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
     ]
   create-sbd_daunts 3 [
     setxy 45 45
@@ -707,6 +723,11 @@ to midway-wave
     set breached false
     set group 0
     set idx idx_sbd_daunts
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
     ]
 end
 
@@ -739,6 +760,7 @@ to go
       die
     ]
   ]
+  kill_planes_range
   tick
 end
 
@@ -746,7 +768,9 @@ to disengage
   ;print "disengage"
   let offense aircrafts with [offensive = true]
   ask offense with [engaged = true] [
-  if hp < flee_thresh [
+  ;TODO change logic for bombers? Since bombers should not try to disengage if they uhm dont have anything to worry about
+  ; ADD in logic for flight ranger here maybe?
+  if hp < flee_thresh or (machine_gun_time <= 0 and cannon_fire_time <= 0)[
     set engaged false
     set flee true
     ]
@@ -816,10 +840,48 @@ to engage
   ;print "engaged"
 end
 
+to kill_planes_range
+  ask aircrafts with [flight_range <= 0][
+    die
+  ]
+end
+
 to move
   ;print "move"
+  ;Chnge for rel logic
+  ask aircrafts with [flight_range <= 150 or (machine_gun_time <= 0 and cannon_fire_time <= 0)][
+    set flee true
+  ]
+
   let offense aircrafts with [offensive = true]
   let defence aircrafts with [offensive = false]
+  let fleeing_aircraft aircrafts with [flee = true]
+
+  ; Have all Fleeing Aircraft go somewhere
+  ; If no Mothership, give up and go to patch 0
+  ask fleeing_aircraft [
+    ifelse count my-out-motherships > 0[
+      let mamaship one-of my-out-motherships
+      let mamashipero [end2] of mamaship
+      let evading [evade] of  mamashipero
+      face mamashipero
+      if evading = false and count out-mothership-neighbors in-radius 4 > 0[
+        print("success")
+       ;if offensive = false[
+         ask mamashipero [
+            set max_cap max_cap + 1
+          ]
+        ;]
+       die
+      ]
+    ][
+      face patch 0 0
+    ]
+
+    jump v
+    set flight_range flight_range - 1
+  ]
+
   ask offense with [flee = false and engaged = false and teleport = false] [
    ; print "check disengaged"
     let one-american american
@@ -859,10 +921,11 @@ to move
       ]
       jump v
     ]
+    set flight_range flight_range - 1
   ]
 
-  ; Defence
-  set defence aircrafts with [offensive = false]
+  ; Defence (Ask if this is ok? )
+  set defence aircrafts with [offensive = false and flee = false]
   ask defence [
     let patrol_x 0
     let patrol_y 0
@@ -923,6 +986,7 @@ to move
           set heading atan (xcor - patrol_x) (ycor - patrol_y) + 90
         ]
       ]
+      set flight_range flight_range - 1
       jump v
     ]
 
@@ -940,6 +1004,7 @@ to move
       if count offense with [(distancexy patrol_x patrol_y) < curr_radar] = 0[
         set defence_state "Patrol"
       ]
+      set flight_range flight_range - 1
       jump v
     ]
 
@@ -978,6 +1043,7 @@ to move
       [
         set defence_state "Investigate"
       ]
+      set flight_range flight_range - 1
       jump v
     ]
   ]
@@ -985,7 +1051,7 @@ to move
 end
 
 to spawn
-  foreach sort ships with [spawn_rate > 0] [one-ship ->
+  foreach sort ships with [spawn_rate > 0 and max_cap > 0 and ticks mod spawn_rate = 0] [one-ship ->
     let x 0
     let y 0
     let one-cap 0
@@ -994,12 +1060,15 @@ to spawn
     ask one-ship [
       set one-cap max_cap
       set max_cap max_cap - 1
+      print(max_cap)
       set x xcor
       set y ycor
       set one-spawn spawn_rate
       set one-american american
     ]
-    if ticks mod one-spawn = 0 and one-cap > 0 [
+    print(one-cap)
+    if one-cap > 0 [
+      ;set max_cap max_cap - 1
       ifelse one-american = false [
         create-zeros 1 [
           setxy x y
@@ -1026,6 +1095,12 @@ to spawn
           set american false
           ; Defence
           set defence_state "Patrol"
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+          create-mothership-to one-ship
         ]
       ]
       [
@@ -1054,6 +1129,12 @@ to spawn
           set american true
           ; Defence
           set defence_state "Patrol"
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+          create-mothership-to one-ship
         ]
       ]
     ]
@@ -1062,8 +1143,9 @@ to spawn
 end
 
 to dogfight
-  ;print "dogfight"
+  ; print "dogfight"
   ; this method simulated the dogfight phase between one or more aircraft
+  ; TODO REcheck LOGic
   ask battles [
 
     let attacker one-of both-ends
@@ -1071,10 +1153,23 @@ to dogfight
     ask attacker [
       set defender other-end
     ]
+    let attacker_m_gun [machine_gun_time] of attacker
+    let attacker_cannon [cannon_fire_time] of attacker
+    let attacker_id [idx] of attacker
     ask defender [
-      ; if target evasion unsuccessful and hit successful, dmg dealt
-      if random 100 < matrix:get p-hit [idx] of attacker idx [
-        set hp hp - random (matrix:get p-dmg [idx] of attacker idx) * max_hp / 100
+      ; if target evasion unsuccessful and hit successful and there is still amunition, dmg dealt
+      if (random 100 < matrix:get p-hit [idx] of attacker idx) and (attacker_m_gun > 0 or attacker_cannon > 0)[
+        ; multiplier for ammunition
+        let mult 1
+        if attacker_cannon <= 0 [
+          set mult 1;item attacker_id machine-gun-mult
+        ]
+        let hp_loss mult * random (matrix:get p-dmg [idx] of attacker idx) * max_hp / 100
+        set hp hp - hp_loss
+        ask attacker [
+          set machine_gun_time machine_gun_time - burst_time
+          set cannon_fire_time cannon_fire_time - burst_time
+        ]
       ]
     ]
   ]
@@ -1123,6 +1218,7 @@ to add_attack_waves
   ]
   ask ships with [american = false and class = 0] [
     if ticks = wave_launch [
+      let ship_var self
       ifelse evade = false [
         hatch-b5ns 10 [
           set color black
@@ -1150,6 +1246,12 @@ to add_attack_waves
           set group -1
           ; Teleport
           set curr_tick -1
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+          create-mothership-to ship_var
         ]
         hatch-zeros 5 [
           set color green
@@ -1177,6 +1279,12 @@ to add_attack_waves
           set group -1
           ; Teleport
           set curr_tick -1
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+          create-mothership-to ship_var
         ]
       ][
         set wave_launch wave_launch + 200
@@ -1216,6 +1324,11 @@ to add_midway_waves
       ; Defence
       set breached false
       set group 3
+      set machine_gun_time item idx machine-gun-time
+      set cannon_fire_time item idx cannon-time
+      set burst_time item idx  burst-time
+      ;Flight Range
+      set flight_range item idx flight-range-ticks
     ]
     set aircrafts turtles with [ship = false]
   ]
@@ -1252,6 +1365,11 @@ to add_midway_waves
         ; Defence
         set breached false
         set group 3
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
       ]
     ]
     foreach indexer [ ind ->
@@ -1282,6 +1400,11 @@ to add_midway_waves
         ; Defence
         set breached false
         set group 3
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
       ]
     ]
     set aircrafts turtles with [ship = false]
@@ -1320,6 +1443,11 @@ to add_midway_waves
         ; Defence
         set breached false
         set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
       ]
     ]
     foreach indexer [ ind ->
@@ -1350,6 +1478,11 @@ to add_midway_waves
         ; Defence
         set breached false
         set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
       ]
     ]
     set aircrafts turtles with [ship = false]
