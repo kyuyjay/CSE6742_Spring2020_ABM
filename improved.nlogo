@@ -779,7 +779,7 @@ to go
     if hp <= 0 [
       die
     ]
-    if not any? battle-neighbors [
+    if not any? battle-neighbors [;'
       set engaged false
     ]
     if ycor < -47 [
@@ -828,11 +828,11 @@ to engage
 
   ask offense [
     let one-american american
-    let defence_air aircrafts with [offensive = false and american = not one-american]
-    let defence_ship ships with [offensive = false and american = not one-american and class = 0]
+    let defence_air aircrafts with [offensive = false and american != one-american]
+    let defence_ship ships with [offensive = false and american != one-american and class = 0]
     ;print "defence ship"
     ;print count defence_ship
-    (ifelse count defence_air in-radius r_engage > 0 [
+    if count defence_air in-radius r_engage > 0 [
       let target one-of defence_air in-radius r_engage
       if class = 1 [
         set engaged true
@@ -842,29 +842,29 @@ to engage
       ]
       create-battle-with target
     ]
-    count defence_ship in-radius r_engage > 0 [
-      print"bombs"
-      ;print "attacking ship"
-      let target min-one-of defence_ship [distance myself]
-      print matrix:get p-hit idx [idx] of target
-      if random 100 < (matrix:get p-hit idx [idx] of target) [
-        ; Triangular Distribution
-        let dmg 0
-        let F (matrix:get p-dmg idx [idx] of target) / 100
-        let U random-float 1
-        ifelse U < F [
-          set dmg sqrt (U * 100 * (matrix:get p-dmg idx [idx] of target))
-        ] [
-          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg idx [idx] of target)))
+    if class = 0 or (class = 1 and count defence_air in-radius r_engage = 0) [
+      if count defence_ship in-radius r_engage > 0 [
+        ;print "attacking ship"
+        let target min-one-of defence_ship [distance myself]
+        if random 100 < (matrix:get p-hit idx [idx] of target) [
+          ; Triangular Distribution
+          let dmg 0
+          let F (matrix:get p-dmg idx [idx] of target) / 100
+          let U random-float 1
+          ifelse U < F [
+            set dmg sqrt (U * 100 * (matrix:get p-dmg idx [idx] of target))
+          ] [
+            set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg idx [idx] of target)))
+          ]
+          ask target [
+            set hp hp - (dmg * [max_hp] of target / 100)
+          ]
         ]
-        ask target [
-          set hp hp - (dmg * [max_hp] of target / 100)
+        if class = 0 [
+          set flee true
         ]
       ]
-      if class = 0 [
-        set flee true
-      ]
-    ])
+    ]
   ]
   ;print "engaged"
 end
@@ -895,7 +895,6 @@ to move
       let evading [evade] of  mamashipero
       face mamashipero
       if evading = false and count out-mothership-neighbors in-radius 4 > 0[
-        print("success")
        ;if offensive = false[
          ask mamashipero [
             set max_cap max_cap + 1
@@ -1089,13 +1088,11 @@ to spawn
     ask one-ship [
       set one-cap max_cap
       set max_cap max_cap - 1
-      print(max_cap)
       set x xcor
       set y ycor
       set one-spawn spawn_rate
       set one-american american
     ]
-    print(one-cap)
     if one-cap > 0 [
       ;set max_cap max_cap - 1
       ifelse one-american = false [
@@ -1207,7 +1204,6 @@ to dogfight
           set hp hp - hp_loss
         ]
         ask attacker [
-            print(machine_gun_time)
             set machine_gun_time machine_gun_time - burst_time
             set cannon_fire_time cannon_fire_time - burst_time
         ]
@@ -1576,10 +1572,10 @@ NIL
 1
 
 BUTTON
-68
-173
-131
-206
+60
+166
+123
+199
 NIL
 go
 T
@@ -1601,7 +1597,7 @@ toa
 toa
 0
 100
-100.0
+32.0
 1
 1
 NIL
