@@ -1,4 +1,4 @@
-extensions [matrix]
+extensions [matrix array]
 
 globals [
   aircrafts
@@ -30,6 +30,13 @@ globals [
   tick-rate
   teleport_time
   wave_launch
+  flight-range-ticks
+  flight-speed-patches
+  machine-gun-mult
+  machine-gun-time
+  cannon-time
+  burst-time
+
 ]
 
 turtles-own [
@@ -65,6 +72,14 @@ turtles-own [
   evade
   ; Teleport
   curr_tick
+  ;Planes
+  ;Guns on planes
+  machine_gun_time
+  cannon_fire_time
+  burst_time
+  ;Flight Range
+  flight_range
+
 ]
 
 ; Create template
@@ -99,6 +114,7 @@ turtles-own [
 
 directed-link-breed [chases chase]
 undirected-link-breed[battles battle]
+directed-link-breed [motherships mothership]
 
 ; American ORBAT
 ; Bombers
@@ -143,6 +159,7 @@ to setup
   setup-patches
   setup-sprites
   setup-idx
+  setup-plane-data
   init-jap-fleet
   init-amer-fleet
   setup-p
@@ -202,6 +219,38 @@ to setup-idx
   set idx_kageros 21
 end
 
+to setup-plane-data
+  ; TODO Fill this with real DATA
+  let flight-ranges-km [1000 1000 1000 1000 1000 1000 1100 0 0 0 1000 1000 1000 1000 0 0 0 0 0 0 0 0]
+  let flight-speed-kmh [250 240 230 240 240 240 240 0 0 0 300 300 300 333 0 0 0 0 0 0 0 0]
+
+  set flight-speed-patches []
+  set flight-range-ticks []
+  let indexer ( range 0 length flight-ranges-km)
+
+  ;TODO DEfine this
+  let km_per_patch .8
+  foreach indexer [index ->
+    let fr_km item index flight-ranges-km
+    let sp_kmh item index flight-speed-kmh
+    let v_i_tick (sp_kmh * tick-rate) / (60 * 60 * km_per_patch)
+    let range_tick 0
+    if v_i_tick > 0[
+      set range_tick (fr_km / km_per_patch) / v_i_tick
+    ]
+
+    set flight-speed-patches lput v_i_tick flight-speed-patches
+    set flight-range-ticks lput range_tick flight-range-ticks
+  ]
+
+  ; Filler numbers for now
+  set machine-gun-mult [1 1 1 1 1 .1 .1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
+  set machine-gun-time [50 50 50 50 50 40 40 0 0 0 50 50 50 41 0 0 0 0 0 0 0 0]
+  set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 7 0 0 0 0 0 0 0 0]
+  set burst-time [1.5 1.5 1.5 1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 0 0 0 0 0]
+
+end
+
 to setup-p
   set p-hit matrix:from-row-list [
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 30 1 0 1 1 1 1 1 1];0 tbd_devs
@@ -251,6 +300,7 @@ to setup-p
                               [20 20 20 20 20 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];20 nagaras
                               [20 20 20 20 20 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];21 kageros
                                                                                        ]
+
 
   ask turtles with [american = true] [
     if class = 0 [
@@ -1377,7 +1427,7 @@ toa
 toa
 0
 100
-100.0
+56.0
 1
 1
 NIL
