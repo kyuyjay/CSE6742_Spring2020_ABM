@@ -1141,7 +1141,7 @@ to spawn
           set max_hp 10
           set flee_thresh 5
           set p_escape 50
-          set idx idx_zeros
+          set idx idx_f4fs
           ; Radii
           set r_detect 15
           set r_engage 5
@@ -1299,7 +1299,7 @@ to add_attack_waves
           set max_hp 30
           set flee_thresh 5
           set p_escape 50
-          set idx idx_b5ns
+          set idx idx_zeros
           ; Radii
           set r_detect 20
           set r_engage 5
