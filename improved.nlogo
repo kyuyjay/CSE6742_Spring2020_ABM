@@ -1182,33 +1182,60 @@ to dogfight
     let attacker_m_gun [machine_gun_time] of attacker
     let attacker_cannon [cannon_fire_time] of attacker
     let attacker_id [idx] of attacker
-    ask defender [
-      ; if target evasion unsuccessful and hit successful and there is still amunition, dmg dealt
-      if (random 100 < matrix:get p-manu [idx] of attacker idx) [
-        if (random 100 < matrix:get p-hit [idx] of attacker idx) and (attacker_m_gun > 0 or attacker_cannon > 0)[
-          ; multiplier for ammunition
-          let mult 1
-          if attacker_cannon <= 0 [
-            set mult 1;item attacker_id machine-gun-mult
-          ]
-          ; Triangular Distribution
-          let dmg 0
-          let F (matrix:get p-dmg [idx] of attacker idx) / 100
-          let U random-float 1
-          ifelse U < F [
-            set dmg sqrt (U * 100 * (matrix:get p-dmg [idx] of attacker idx))
-          ] [
-            set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg [idx] of attacker idx)))
-          ]
-          let hp_loss mult * dmg * max_hp / 100
-          set hp hp - hp_loss
+    let attacker_max_hp [max_hp] of attacker
+    let defender_max_hp [max_hp] of defender
+    let defender_m_gun [machine_gun_time] of defender
+    let defender_cannon [cannon_fire_time] of defender
+    let defender_id [idx] of defender
+
+    ; Attacker Attacks
+    if (random 100 < matrix:get p-manu attacker_id defender_id)[
+      if (random 100 < matrix:get p-hit attacker_id defender_id) and (attacker_m_gun > 0 or attacker_cannon > 0)[
+        let mult 1
+        if attacker_cannon <= 0 [
+          set mult item attacker_id machine-gun-mult
         ]
+        let dmg 0
+        let F (matrix:get p-dmg attacker_id defender_id) / 100
+        let U random-float 1
+        ifelse U < F [
+          set dmg sqrt (U * 100 * (matrix:get p-dmg attacker_id defender_id))
+        ] [
+          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get attacker_id defender_id)))
+        ]
+        let hp_loss mult * dmg * max_hp / 100
+        ask defender [set hp hp - hp_loss]
         ask attacker [
-            set machine_gun_time machine_gun_time - burst_time
-            set cannon_fire_time cannon_fire_time - burst_time
+          set machine_gun_time machine_gun_time - burst_time
+          set cannon_fire_time cannon_fire_time - burst_time
         ]
       ]
     ]
+
+    ; Defender Attacks
+    if (random 100 < matrix:get p-manu defender_id attacker_id)[
+      if (random 100 < matrix:get p-hit defender_id attacker_id) and (defender_m_gun > 0 or defender_cannon > 0)[
+        let mult 1
+        if defender_cannon <= 0 [
+          set mult item defender_id machine-gun-mult
+        ]
+        let dmg 0
+        let F (matrix:get p-dmg defender_id attacker_id) / 100
+        let U random-float 1
+        ifelse U < F [
+          set dmg sqrt (U * 100 * (matrix:get p-dmg defender_id attacker_id))
+        ] [
+          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get defender_id attacker_id)))
+        ]
+        let hp_loss mult * dmg * max_hp / 100
+        ask attacker [set hp hp - hp_loss]
+        ask defender [
+          set machine_gun_time machine_gun_time - burst_time
+          set cannon_fire_time cannon_fire_time - burst_time
+        ]
+      ]
+    ]
+
   ]
 end
 
