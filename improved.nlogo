@@ -842,10 +842,12 @@ to engage
       ]
       create-battle-with target
     ]
+    ; What does this line do?
     if class = 0 or (class = 1 and count defence_air in-radius r_engage = 0) [
       if count defence_ship in-radius r_engage > 0 [
-        ;print "attacking ship"
+        ;print "dropping bomb"
         let target min-one-of defence_ship [distance myself]
+
         if random 100 < (matrix:get p-hit idx [idx] of target) [
           ; Triangular Distribution
           let dmg 0
@@ -856,11 +858,14 @@ to engage
           ] [
             set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg idx [idx] of target)))
           ]
+          ;print("damage")
+          ;print(dmg)
           ask target [
             set hp hp - (dmg * [max_hp] of target / 100)
           ]
         ]
         if class = 0 [
+          ;print("dropped bomb")
           set flee true
         ]
       ]
@@ -903,7 +908,7 @@ to move
        die
       ]
     ][
-      face patch 0 0
+      face patch 200 0
     ]
 
     jump v
@@ -1201,9 +1206,9 @@ to dogfight
         ifelse U < F [
           set dmg sqrt (U * 100 * (matrix:get p-dmg attacker_id defender_id))
         ] [
-          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get attacker_id defender_id)))
+          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg attacker_id defender_id)))
         ]
-        let hp_loss mult * dmg * max_hp / 100
+        let hp_loss mult * dmg * defender_max_hp / 100
         ask defender [set hp hp - hp_loss]
         ask attacker [
           set machine_gun_time machine_gun_time - burst_time
@@ -1225,9 +1230,9 @@ to dogfight
         ifelse U < F [
           set dmg sqrt (U * 100 * (matrix:get p-dmg defender_id attacker_id))
         ] [
-          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get defender_id attacker_id)))
+          set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg defender_id attacker_id)))
         ]
-        let hp_loss mult * dmg * max_hp / 100
+        let hp_loss mult * dmg * attacker_max_hp / 100
         ask attacker [set hp hp - hp_loss]
         ask defender [
           set machine_gun_time machine_gun_time - burst_time
