@@ -80,7 +80,9 @@ turtles-own [
   burst_time
   ;Flight Range
   flight_range
-
+  ; Yorktown
+  yorky
+  launched_planes
 ]
 
 ; Create template
@@ -279,20 +281,20 @@ to setup-p
                                                                                        ]
 
   set p-hit matrix:from-row-list [
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 30 1 0 1 1 1 1 1 1];0 tbd_devs
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 30 20 0 20 20 0 0 0 0];1 sbd_daunts
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 30 1 0 1 1 1 1 1 1];2 tbf_aves
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 60 1 0 1 1 0 0 0 0];3 b26s
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 95 1 0 1 1 0 0 0 0];4 b17s
-                              [0 0 0 0 0 0 0 0 0 0 50 60 0 10 0 0 0 0 0 0 0 0];5 f4fs
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];0 tbd_devs
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 50 0 50 50 0 0 0 0];1 sbd_daunts
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];2 tbf_aves
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];3 b26s
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];4 b17s
+                              [0 0 0 0 0 0 0 0 0 0 30 40 0 10 0 0 0 0 0 0 0 0];5 f4fs
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];6 f2as
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];7 yorktowns
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];8 acruisers
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];9 adestroyers
-                              [0 0 0 0 0 30 0 10 10 10 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-                              [0 0 0 0 0 30 0 10 10 10 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
+                              [0 0 0 0 0 20 0 60 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
+                              [0 0 0 0 0 20 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
-                              [42 16 48 54 76 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];13 zeros
+                              [60 40 60 60 80 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];13 zeros
                               [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];14 amagis
                               [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];15 tosas
                               [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];16 hiryus
@@ -312,21 +314,21 @@ to setup-p
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	100	50	0	50	50	0	0	0	0];4 b17s
                               [0	0	0	0	0	0	0	0	0	0	80	80	0	100	0	0	0	0	0	0	0	0];5 f4fs
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];6 f2as
-                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0];7 yorktowns
-                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0];8 acruisers
+                              [0	0	0	0	0	0	0	0	0	0	60 60	60 60	0	0	0	0	0	0	0	0];7 yorktowns
+                              [0	0	0	0	0	0	0	0	0	0	60 60	60 60	0	0	0	0	0	0	0	0];8 acruisers
                               [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0];9 adestroyers
-                              [0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-                              [0 0 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
+                              [0 0 0 0 0 5 0 70 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
+                              [0 0 0 0 0 5 0 100 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
                               [30	30	30	10	5	50	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];13 zeros
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];14 amagis
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];15 tosas
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];16 hiryus
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];17 soryus
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];18 kongos
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];19 tones
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];20 nagaras
-                              [20	20	20	20	20	20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];21 kageros
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];14 amagis
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];15 tosas
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];16 hiryus
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];17 soryus
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];18 kongos
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];19 tones
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];20 nagaras
+                              [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];21 kageros
                                                                                        ]
 
 
@@ -438,6 +440,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-tosas 1 [
     setxy 20 -10
@@ -462,6 +465,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-soryus 1 [
     set color red
@@ -485,6 +489,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-hiryus 1 [
     setxy 20 10
@@ -509,6 +514,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   ; Screen
   create-kongos 1 [
@@ -534,6 +540,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-tones 1 [
     setxy -10 30
@@ -558,6 +565,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-nagaras 1 [
     setxy -23 -25
@@ -582,6 +590,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
   create-kageros 1 [
     setxy -23 25
@@ -606,6 +615,7 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    set launched_planes false
   ]
 end
 
@@ -634,30 +644,8 @@ to init-amer-fleet
     set flee false
     set teleport false
     set american true
-  ]
-  create-yorktowns 1 [
-    setxy -150 0
-    set color yellow
-    set size 8
-    set heading 90
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
-    set idx idx_yorktowns
-    ; Radii
-    set r_detect 120
-    set r_engage 30
-    ; States
-    set ship true
-    set offensive false
-    set class 0
-    set engaged false
-    set flee false
-    set teleport false
-    set american true
+    set yorky false
+    set launched_planes false
   ]
   create-yorktowns 1 [
     setxy -150 -10
@@ -682,6 +670,45 @@ to init-amer-fleet
     set flee false
     set teleport false
     set american true
+    set yorky false
+    set launched_planes false
+  ]
+end
+
+to in-yorktown
+  let wave-launch 200
+  if ticks = wave-launch [
+    create-yorktowns 1 [
+      setxy -200 0
+      set color yellow
+      set size 8
+      set heading 90
+      ; Personal Parameters
+      set v 0
+      set hp 100
+      set max_hp 100
+      set flee_thresh 0
+      set p_escape 0
+      set idx idx_yorktowns
+      ; Radii
+      set r_detect 120
+      set r_engage 30
+      ; States
+      set ship true
+      set offensive false
+      set class 0
+      set engaged false
+      set flee false
+      set teleport false
+      set american true
+      set yorky true
+      set spawn_rate 30
+      set r_radar 30
+      set r_patrol 40
+      set cap_commit 50
+      set max_cap 20
+      set evade false
+    ]
   ]
 end
 to midway-wave
@@ -771,6 +798,38 @@ to go
   antiair
   add_midway_waves
   add_attack_waves
+  add-american-waves
+  in-yorktown
+  retreat
+  cleanup
+  if count ships with [american = true] = 0 [
+    user-message "American Fleet Destroyed"
+    stop
+  ]
+  if count ships with [american = false] = 0 [
+    user-message "Japanese Fleet Destroyed"
+    stop
+  ]
+  tick
+end
+
+to retreat
+  if count aircrafts with [class = 0 and flee = false and offensive = true and american = true] = 0 [
+    ask aircrafts with  [class = 1 and offensive = true and american = true] [
+      set flee true
+      set engaged false
+    ]
+  ]
+  if count aircrafts with [class = 0 and flee = false and offensive = true and american = false] = 0 [
+    ask aircrafts with  [class = 1 and offensive = true and american = false] [
+      set flee true
+      set engaged false
+    ]
+  ]
+
+end
+
+to cleanup
   ask ships [
     set label round hp
   ]
@@ -790,7 +849,6 @@ to go
   ]
   kill_planes_range
   ask motherships [hide-link]
-  tick
 end
 
 to disengage
@@ -846,10 +904,17 @@ to engage
     ]
     ; What does this line do?
     if class = 0 or (class = 1 and count defence_air in-radius r_engage = 0) [
+;      if one-american = false[
+;        ;print defence_ship
+;        ;print r_engage
+;      ]
       if count defence_ship in-radius r_engage > 0 [
         ;print "dropping bomb"
         let target min-one-of defence_ship [distance myself]
-
+        ;print self
+        ;print matrix:get p-hit idx [idx] of target
+        ;print idx
+        ;print [idx] of target
         if random 100 < (matrix:get p-hit idx [idx] of target) [
           ; Triangular Distribution
           let dmg 0
@@ -878,6 +943,7 @@ end
 
 to kill_planes_range
   ask aircrafts with [flight_range <= 0][
+    print "died due to range"
     die
   ]
 end
@@ -885,7 +951,16 @@ end
 to move
   ;print "move"
   ;Chnge for rel logic
-  ask aircrafts with [flight_range <= 150 or (machine_gun_time <= 0 and cannon_fire_time <= 0)][
+  ask ships with [american = true and yorky = true] [
+    if xcor < -150 [
+      jump 2
+    ]
+  ]
+
+  ask aircrafts with [class = 0 and (flight_range <= 50 or (machine_gun_time <= 0 and cannon_fire_time <= 0))][
+    set flee true
+  ]
+  ask aircrafts with [class = 1 and (flight_range <= 100 or (machine_gun_time <= 0 and cannon_fire_time <= 0))][
     set flee true
   ]
 
@@ -902,15 +977,23 @@ to move
       let evading [evade] of  mamashipero
       face mamashipero
       if evading = false and count out-mothership-neighbors in-radius 4 > 0[
-       ;if offensive = false[
+       if offensive = false[
          ask mamashipero [
             set max_cap max_cap + 1
           ]
-        ;]
+        ]
        die
       ]
     ][
-      face patch 200 0
+      if offensive = true[
+        face patch 200 0
+      ]
+      if american = false and offensive = false[
+        face patch 200 0
+      ]
+      if american = true and offensive = false[
+        face patch -100 0
+      ]
     ]
 
     jump v
@@ -923,8 +1006,10 @@ to move
     set defence aircrafts with [offensive = false and american != one-american]
     if class = 0 [
       let carriers ships with [class = 0 and american != one-american]
-      face min-one-of carriers [distance myself]
-      jump v
+      if count carriers > 0 [
+        face min-one-of carriers [distance myself]
+        jump v
+      ]
     ]
     if class = 1 [
       if count my-out-chases = 0 [
@@ -1139,7 +1224,7 @@ to spawn
       [
         create-f4fs 1 [
           setxy x y
-          set color yellow
+          set color white
           set size 3
           set heading 0
           ; Personal Parameters
@@ -1254,14 +1339,21 @@ to teleportation
         set teleport true
       ]
       if ticks - curr_tick > teleport_time [
-        ifelse american = true [
-          set heading 90
-        ][
-          set heading 270
-        ]
+;        ifelse american = true [
+;          set heading 90
+;        ][
+;          set heading 270
+;        ]
         jump 50
         set curr_tick 0
         set teleport false
+        ask my-battles [
+          die
+        ]
+        ask my-chases [
+          die
+        ]
+
       ]
     ]
   ]
@@ -1283,7 +1375,7 @@ to antiair
 end
 
 to add_attack_waves
-  let wave_init 30 + toa; Time of Attack Slider
+  let wave_init toa * (60 / tick-rate); Time of Attack Slider
   if wave_launch = 0 [
     set wave_launch wave_init
   ]
@@ -1291,6 +1383,7 @@ to add_attack_waves
     if ticks = wave_launch [
       let ship_var self
       ifelse evade = false [
+        if launched_planes = false[
         hatch-b5ns 10 [
           set color black
           set size 3
@@ -1357,6 +1450,8 @@ to add_attack_waves
           set flight_range item idx flight-range-ticks
           create-mothership-to ship_var
         ]
+          set launched_planes true
+          ]
       ][
         set wave_launch wave_launch + 200
       ]
@@ -1366,11 +1461,16 @@ to add_attack_waves
 end
 
 to add_midway_waves
-  let wave_2 30 ; 8:22 am right now randomly selected time
-  let wave_3 100 ; 9:22 am
-  let wave_4 150 ; 9:22 am
+  let wave_2 70	* (60 / tick-rate)
+  let wave_3 113 * (60 / tick-rate)
+  let wave_4 130 * (60 / tick-rate)
+  let wave_5 147 * (60 / tick-rate)
+  let wave_6 198 * (60 / tick-rate)
+  let wave_7 220 * (60 / tick-rate)
+  let wave_8 250 * (60 / tick-rate)
+  let wave_9 260 * (60 / tick-rate)
   if ticks = wave_2 [
-    create-sbd_daunts 3 [
+    create-tbd_devs 3 [
       setxy -45 -45
       set color yellow
       set size 3
@@ -1380,7 +1480,7 @@ to add_midway_waves
       set max_hp 30
       set flee_thresh 5
       set p_escape 50
-      set idx idx_sbd_daunts
+      set idx idx_tbd_devs
       ; Radii
       set r_detect 20
       set r_engage 5
@@ -1405,13 +1505,13 @@ to add_midway_waves
   ]
   if ticks = wave_3[
 
-    let indexer ( range 0 7 )
-    let bombIndexer ( range 0 10 )
+    let indexer ( range 0 3 )
+    let bombIndexer ( range 0 5 )
 
     foreach bombIndexer [ ind ->
       let ycoord (-24 + 1 * ind)
       let xcoord (35 + 2 * ind)
-      create-sbd_daunts 1 [
+      create-tbd_devs 1 [
         setxy xcoord ycoord
         set color yellow
         set size 3
@@ -1421,7 +1521,7 @@ to add_midway_waves
         set max_hp 30
         set flee_thresh 5
         set p_escape 50
-        set idx idx_sbd_daunts
+        set idx idx_tbd_devs
         ; Radii
         set r_detect 20
         set r_engage 5
@@ -1483,13 +1583,13 @@ to add_midway_waves
   ]
 
   if ticks = wave_4[
-    let indexer ( range 0 7 )
-    let bombIndexer ( range 0 10 )
+    let indexer ( range 0 4 )
+    let bombIndexer ( range 0 6 )
 
     foreach bombIndexer [ ind ->
       let ycoord (30 + 1 * ind)
       let xcoord (42 + 2 * ind)
-      create-sbd_daunts 1 [
+      create-tbd_devs 1 [
         setxy xcoord ycoord
         set color yellow
         set size 3
@@ -1499,7 +1599,7 @@ to add_midway_waves
         set max_hp 30
         set flee_thresh 5
         set p_escape 50
-        set idx idx_sbd_daunts
+        set idx idx_tbd_devs
         ; Radii
         set r_detect 20
         set r_engage 5
@@ -1556,9 +1656,505 @@ to add_midway_waves
         set flight_range item idx flight-range-ticks
       ]
     ]
+  ]
+    if ticks = wave_5[
+      let indexer ( range 0 6 )
+      let bombIndexer ( range 0 5 )
+
+      foreach bombIndexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-tbd_devs 1 [
+          setxy xcoord ycoord
+          set color yellow
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_tbd_devs
+          ; Radii
+          set r_detect 20
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 0
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+      foreach indexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-f4fs 1 [
+          setxy xcoord ycoord
+          set color white
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_f4fs
+          ; Radii
+          set r_detect 15
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 1
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+    ]
+    if ticks = wave_6[
+      let indexer ( range 0 6 )
+      let bombIndexer ( range 0 5 )
+
+      foreach bombIndexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-tbd_devs 1 [
+          setxy xcoord ycoord
+          set color yellow
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_tbd_devs
+          ; Radii
+          set r_detect 20
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 0
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+      foreach indexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-f4fs 1 [
+          setxy xcoord ycoord
+          set color white
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_f4fs
+          ; Radii
+          set r_detect 15
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 1
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+    ]
+    if ticks = wave_7[
+      let indexer ( range 0 6 )
+      let bombIndexer ( range 0 5 )
+
+      foreach bombIndexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-tbd_devs 1 [
+          setxy xcoord ycoord
+          set color yellow
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_tbd_devs
+          ; Radii
+          set r_detect 20
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 0
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+      foreach indexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-f4fs 1 [
+          setxy xcoord ycoord
+          set color white
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_f4fs
+          ; Radii
+          set r_detect 15
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 1
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+    ]
+     if ticks = wave_8[
+      let indexer ( range 0 6 )
+      let bombIndexer ( range 0 5 )
+
+      foreach bombIndexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-tbd_devs 1 [
+          setxy xcoord ycoord
+          set color yellow
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_tbd_devs
+          ; Radii
+          set r_detect 20
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 0
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+      foreach indexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-f4fs 1 [
+          setxy xcoord ycoord
+          set color white
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_f4fs
+          ; Radii
+          set r_detect 15
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 1
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+    ]
+     if ticks = wave_9[
+      let indexer ( range 0 6 )
+      let bombIndexer ( range 0 5 )
+
+      foreach bombIndexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-tbd_devs 1 [
+          setxy xcoord ycoord
+          set color yellow
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_tbd_devs
+          ; Radii
+          set r_detect 20
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 0
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+      foreach indexer [ ind ->
+        let ycoord (30 + 1 * ind)
+        let xcoord (42 + 2 * ind)
+        create-f4fs 1 [
+          setxy xcoord ycoord
+          set color white
+          set size 3
+          ; Personal Parameters
+          set v 1
+          set hp 30
+          set max_hp 30
+          set flee_thresh 5
+          set p_escape 50
+          set idx idx_f4fs
+          ; Radii
+          set r_detect 15
+          set r_engage 5
+          ; States
+          set ship false
+          set offensive true
+          set class 1
+          set engaged false
+          set flee false
+          set teleport false
+          set american true
+          ; Defence
+          set breached false
+          set group 4
+          set machine_gun_time item idx machine-gun-time
+          set cannon_fire_time item idx cannon-time
+          set burst_time item idx  burst-time
+          ;Flight Range
+          set flight_range item idx flight-range-ticks
+        ]
+      ]
+    ]
+
+
+ set aircrafts turtles with [ship = false]
+
+
+end
+
+to add-american-waves
+  let wave_1 800
+  if ticks = wave_1[
+    let indexer ( range 0 15 )
+    let devastatorIndexer ( range 0 20 )
+    let dauntlessIndexer ( range 0 47 )
+
+    foreach dauntlessIndexer [ ind ->
+      let ycoord (-40 + (1 * ind) mod 6)
+      let xcoord (-20 + (1 * ind) mod 6)
+      create-sbd_daunts 1 [
+        setxy xcoord ycoord
+        set color yellow
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_sbd_daunts
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach devastatorIndexer [ ind ->
+      let ycoord (-40 + (1 * ind) mod 6)
+      let xcoord (-20 + (1 * ind) mod 6)
+      create-tbd_devs 1 [
+        setxy xcoord ycoord
+        set color yellow
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_tbd_devs
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach indexer [ ind ->
+      let ycoord (-40 + (1 * ind) mod 6)
+      let xcoord (-20 + (1 * ind) mod 6)
+      create-f4fs 1 [
+        setxy xcoord ycoord
+        set color white
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_f4fs
+        ; Radii
+        set r_detect 15
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 1
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
     set aircrafts turtles with [ship = false]
 
   ]
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1589,10 +2185,10 @@ ticks
 30.0
 
 BUTTON
+336
+10
+399
 43
-44
-106
-77
 NIL
 setup\n
 NIL
@@ -1606,10 +2202,10 @@ NIL
 1
 
 BUTTON
-121
-48
-184
-81
+336
+43
+399
+76
 NIL
 go
 T
@@ -1623,15 +2219,15 @@ NIL
 1
 
 SLIDER
-37
-94
-209
-127
+211
+97
+383
+130
 toa
 toa
 0
-100
-7.0
+260
+260.0
 1
 1
 NIL
