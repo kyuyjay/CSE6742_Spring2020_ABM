@@ -1247,8 +1247,8 @@ to dogfight
 end
 
 to teleportation
-  ask turtles [
-    if [pcolor] of patch-here = white [
+  ask turtles with [offensive = true] [
+    if [pcolor] of patch-here = white[
       if curr_tick = -1 [
         set curr_tick ticks
         set teleport true
@@ -1631,7 +1631,7 @@ toa
 toa
 0
 100
-32.0
+7.0
 1
 1
 NIL
