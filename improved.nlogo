@@ -1353,6 +1353,7 @@ to teleportation
         ask my-chases [
           die
         ]
+        set engaged false
 
       ]
     ]
@@ -1384,7 +1385,7 @@ to add_attack_waves
       let ship_var self
       ifelse evade = false [
         if launched_planes = false[
-        hatch-b5ns 10 [
+        hatch-b5ns 15 [
           set color black
           set size 3
           ; Personal Parameters
@@ -1417,7 +1418,7 @@ to add_attack_waves
           set flight_range item idx flight-range-ticks
           create-mothership-to ship_var
         ]
-        hatch-zeros 5 [
+        hatch-zeros 6 [
           set color green
           set size 3
           ; Personal Parameters
@@ -2042,16 +2043,16 @@ end
 to add-american-waves
   let wave_1 800
   if ticks = wave_1[
-    let indexer ( range 0 15 )
-    let devastatorIndexer ( range 0 20 )
-    let dauntlessIndexer ( range 0 47 )
+    let indexer ( range 0 8 )
+    let devastatorIndexer ( range 0 6 )
+    let dauntlessIndexer ( range 0 16 )
 
     foreach dauntlessIndexer [ ind ->
       let ycoord (-40 + (1 * ind) mod 6)
-      let xcoord (-20 + (1 * ind) mod 6)
+      let xcoord (-20 + (2 * ind) mod 6)
       create-sbd_daunts 1 [
         setxy xcoord ycoord
-        set color yellow
+        set color orange
         set size 3
         ; Personal Parameters
         set v 1
@@ -2082,11 +2083,11 @@ to add-american-waves
       ]
     ]
     foreach devastatorIndexer [ ind ->
-      let ycoord (-40 + (1 * ind) mod 6)
+      let ycoord (-38 + (2 * ind) mod 6)
       let xcoord (-20 + (1 * ind) mod 6)
       create-tbd_devs 1 [
         setxy xcoord ycoord
-        set color yellow
+        set color red
         set size 3
         ; Personal Parameters
         set v 1
@@ -2119,6 +2120,216 @@ to add-american-waves
     foreach indexer [ ind ->
       let ycoord (-40 + (1 * ind) mod 6)
       let xcoord (-20 + (1 * ind) mod 6)
+      create-f4fs 1 [
+        setxy xcoord ycoord
+        set color white
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_f4fs
+        ; Radii
+        set r_detect 15
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 1
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach dauntlessIndexer [ ind ->
+      let ycoord (37 + (1 * ind) mod 6)
+      let xcoord (-20 + (2 * ind) mod 6)
+      create-sbd_daunts 1 [
+        setxy xcoord ycoord
+        set color orange
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_sbd_daunts
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach devastatorIndexer [ ind ->
+      let ycoord (38 + (2 * ind) mod 6)
+      let xcoord (-20 + (1 * ind) mod 6)
+      create-tbd_devs 1 [
+        setxy xcoord ycoord
+        set color red
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_tbd_devs
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach indexer [ ind ->
+      let ycoord (35 + (1 * ind) mod 6)
+      let xcoord (-20 + (1 * ind) mod 6)
+      create-f4fs 1 [
+        setxy xcoord ycoord
+        set color white
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_f4fs
+        ; Radii
+        set r_detect 15
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 1
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach dauntlessIndexer [ ind ->
+      let ycoord (-40 + (1 * ind) mod 6)
+      let xcoord (30 + (2 * ind) mod 6)
+      create-sbd_daunts 1 [
+        setxy xcoord ycoord
+        set color orange
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_sbd_daunts
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach devastatorIndexer [ ind ->
+      let ycoord (-38 + (2 * ind) mod 6)
+      let xcoord (30 + (1 * ind) mod 6)
+      create-tbd_devs 1 [
+        setxy xcoord ycoord
+        set color red
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_tbd_devs
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
+    ]
+    foreach indexer [ ind ->
+      let ycoord (-40 + (1 * ind) mod 6)
+      let xcoord (30 + (1 * ind) mod 6)
       create-f4fs 1 [
         setxy xcoord ycoord
         set color white
@@ -2227,7 +2438,7 @@ toa
 toa
 0
 260
-260.0
+86.0
 1
 1
 NIL
