@@ -246,8 +246,8 @@ to setup-plane-data
 
   ; Filler numbers for now
   set machine-gun-mult [1 1 1 1 1 1 1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
-  set machine-gun-time [50 50 50 50 50 40 40 0 0 0 50 50 50 41 0 0 0 0 0 0 0 0]
-  set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 7 0 0 0 0 0 0 0 0]
+  set machine-gun-time [70 70 70 70 70 20 100 0 0 0 70 70 70 41 0 0 0 0 0 0 0 0]
+  set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 8 0 0 0 0 0 0 0 0]
   set burst-time [1.5 1.5 1.5 1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 0 0 0 0 0]
 
 end
@@ -344,7 +344,7 @@ to setup-p
     ]
     set r_radar 30
     set r_patrol 40
-    set cap_commit 50
+    set cap_commit 80
     set max_cap 20
     set evade false
   ]
