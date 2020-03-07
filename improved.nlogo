@@ -29,7 +29,12 @@ globals [
   idx_nagaras
   idx_kageros
   tick-rate
+  teleport_ticks
+  teleport_times
   teleport_time
+  teleport_phase
+  next_teleport_phase
+  max_teleport_dist
   wave_launch
   flight-range-ticks
   flight-speed-patches
@@ -37,7 +42,6 @@ globals [
   machine-gun-time
   cannon-time
   burst-time
-
 ]
 
 turtles-own [
@@ -160,6 +164,7 @@ to setup
   clear-all
   set-shape
   setup-patches
+  setup-teleport
   setup-sprites
   setup-idx
   setup-plane-data
@@ -223,7 +228,6 @@ to setup-idx
 end
 
 to setup-plane-data
-  ; TODO Fill this with real DATA
   let flight-ranges-km [435 1115 1000 1000 2000 880 1100 0 0 0 840 608 1000 1162 0 0 0 0 0 0 0 0]
   let flight-speed-kmh [250 240 230 240 240 240 240 0 0 0 300 300 300 333 0 0 0 0 0 0 0 0]
 
@@ -231,14 +235,13 @@ to setup-plane-data
   set flight-range-ticks []
   let indexer ( range 0 length flight-ranges-km)
 
-  ;TODO DEfine this
   let km_per_patch .8
   foreach indexer [index ->
     let fr_km item index flight-ranges-km
     let sp_kmh item index flight-speed-kmh
     let v_i_tick (sp_kmh * tick-rate) / (60 * 60 * km_per_patch)
     let range_tick 0
-    if v_i_tick > 0[
+    if v_i_tick > 0 [
       set range_tick (fr_km / km_per_patch) / v_i_tick
     ]
 
@@ -246,7 +249,6 @@ to setup-plane-data
     set flight-range-ticks lput range_tick flight-range-ticks
   ]
 
-  ; Filler numbers for now
   set machine-gun-mult [1 1 1 1 1 1 1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
   set machine-gun-time [70 70 70 70 70 20 100 0 0 0 70 70 70 41 0 0 0 0 0 0 0 0]
   set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 8 0 0 0 0 0 0 0 0]
@@ -292,7 +294,8 @@ to setup-p
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];8 acruisers
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];9 adestroyers
                               [0 0 0 0 0 20 0 60 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-                              [0 0 0 0 0 20 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
+    ; 20 at 7
+                              [0 0 0 0 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
                               [60 40 60 60 80 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];13 zeros
                               [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];14 amagis
@@ -360,10 +363,6 @@ end
 to setup-patches
   ; import-drawing "background.png"
   ask patches [set pcolor blue]
-  ask patches with [pxcor < -50 and pxcor > -90]
-  [
-    set pcolor white;
-  ]
 end
 
 to setup-sprites
@@ -379,6 +378,19 @@ to setup-sprites
   set-default-shape nagaras "boat top"
   set-default-shape kageros "boat top"
   set-default-shape kongos "boat top"
+end
+
+to setup-teleport
+  ; Switch to new phase at what tick
+  set teleport_ticks [-1 500 800 900 1200 1600]
+  ; Time (int ticks) to teleport at given phase
+  set teleport_times [400 300 200 100 50 25]
+  set max_teleport_dist 25
+  set teleport_phase length teleport_ticks
+  set next_teleport_phase item 0 teleport_ticks
+  ask patches with [pxcor >= -70 - max_teleport_dist and pxcor <= -70 + max_teleport_dist] [
+    set pcolor white;
+  ]
 end
 
 to init-jap-fleet
@@ -675,6 +687,34 @@ to init-amer-fleet
   ]
 end
 
+to go
+  set aircrafts turtles with [ship = false]
+  set ships turtles with [ship = true]
+  build-teleport
+  disengage
+  engage
+  dogfight
+  move
+  teleports
+  spawn
+  antiair
+  add_midway_waves
+  add_attack_waves
+  add-american-waves
+  in-yorktown
+  retreat
+  cleanup
+  if count ships with [american = true] = 0 [
+    user-message "American Fleet Destroyed"
+    stop
+  ]
+  if count ships with [american = false] = 0 [
+    user-message "Japanese Fleet Destroyed"
+    stop
+  ]
+  tick
+end
+
 to in-yorktown
   let wave-launch 200
   if ticks = wave-launch [
@@ -711,6 +751,33 @@ to in-yorktown
     ]
   ]
 end
+
+to build-teleport
+  if ticks > next_teleport_phase [
+    if teleport_phase > 0 [
+      set teleport_time item (length teleport_times - teleport_phase) teleport_times
+      if teleport_phase > 1 [
+        set next_teleport_phase item (length teleport_times - teleport_phase + 1) teleport_ticks
+      ]
+    ]
+    let dist (teleport_time / item 0 teleport_times) * max_teleport_dist
+    print dist
+    ask patches with [pxcor < -70 - dist or pxcor > -70 + dist] [
+      set pcolor blue;
+    ]
+    set teleport_phase teleport_phase - 1
+    print teleport_phase
+  ]
+  ask patches with [pxcor = -60 and pycor = -40] [
+    set plabel "Distance between fleets: "
+    set plabel-color black
+  ]
+  ask patches with [pxcor = -70 and pycor = -45] [
+    set plabel teleport_time
+    set plabel-color black
+  ]
+end
+
 to midway-wave
   create-f4fs 6 [
     setxy -47 -47
@@ -786,33 +853,6 @@ to midway-wave
     ]
 end
 
-to go
-  set aircrafts turtles with [ship = false]
-  set ships turtles with [ship = true]
-  disengage
-  engage
-  dogfight
-  move
-  teleportation
-  spawn
-  antiair
-  add_midway_waves
-  add_attack_waves
-  add-american-waves
-  in-yorktown
-  retreat
-  cleanup
-  if count ships with [american = true] = 0 [
-    user-message "American Fleet Destroyed"
-    stop
-  ]
-  if count ships with [american = false] = 0 [
-    user-message "Japanese Fleet Destroyed"
-    stop
-  ]
-  tick
-end
-
 to retreat
   if count aircrafts with [class = 0 and flee = false and offensive = true and american = true] = 0 [
     ask aircrafts with  [class = 1 and offensive = true and american = true] [
@@ -844,6 +884,9 @@ to cleanup
       set engaged false
     ]
     if ycor < -47 [
+      die
+    ]
+    if xcor > 60 and american = true [
       die
     ]
   ]
@@ -902,7 +945,6 @@ to engage
       ]
       create-battle-with target
     ]
-    ; What does this line do?
     if class = 0 or (class = 1 and count defence_air in-radius r_engage = 0) [
 ;      if one-american = false[
 ;        ;print defence_ship
@@ -943,7 +985,7 @@ end
 
 to kill_planes_range
   ask aircrafts with [flight_range <= 0][
-    print "died due to range"
+    ; print "died due to range"
     die
   ]
 end
@@ -966,7 +1008,7 @@ to move
 
   let offense aircrafts with [offensive = true]
   let defence aircrafts with [offensive = false]
-  let fleeing_aircraft aircrafts with [flee = true]
+  let fleeing_aircraft aircrafts with [flee = true and teleport = false]
 
   ; Have all Fleeing Aircraft go somewhere
   ; If no Mothership, give up and go to patch 0
@@ -1331,30 +1373,29 @@ to dogfight
   ]
 end
 
-to teleportation
+to teleports
   ask turtles with [offensive = true] [
-    if [pcolor] of patch-here = white[
+    if [pcolor] of patch-here = white [
+      set xcor -70
       if curr_tick = -1 [
         set curr_tick ticks
         set teleport true
-      ]
-      if ticks - curr_tick > teleport_time [
-;        ifelse american = true [
-;          set heading 90
-;        ][
-;          set heading 270
-;        ]
-        jump 50
-        set curr_tick 0
-        set teleport false
         ask my-battles [
           die
         ]
-        ask my-chases [
+        ask my-in-chases [
+          ask other-end [
+            set engaged false
+            set defence_state "Patrol"
+          ]
           die
         ]
-        set engaged false
-
+      ]
+      if ticks - curr_tick > teleport_time [
+        let dist (teleport_time / item 0 teleport_times) * max_teleport_dist
+        jump dist * 2
+        set curr_tick -1
+        set teleport false
       ]
     ]
   ]
@@ -2369,9 +2410,9 @@ to add-american-waves
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-406
+210
 10
-2419
+2223
 524
 -1
 -1
@@ -2396,10 +2437,10 @@ ticks
 30.0
 
 BUTTON
-336
-10
-399
 43
+44
+106
+77
 NIL
 setup\n
 NIL
@@ -2413,10 +2454,10 @@ NIL
 1
 
 BUTTON
-336
-43
-399
-76
+60
+166
+123
+199
 NIL
 go
 T
@@ -2430,75 +2471,19 @@ NIL
 1
 
 SLIDER
-211
-97
-383
-130
+11
+266
+183
+299
 toa
 toa
 0
-260
-86.0
+100
+0.0
 1
 1
 NIL
 HORIZONTAL
-
-PLOT
-1
-156
-397
-306
-Carrier Health
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-true
-"" ""
-PENS
-"Japanese Carrier HP" 1.0 0 -5298144 true "" "let japanese ships with [american = false and class = 0]\nplot sum [hp] of japanese"
-"American Carrier Strength" 1.0 0 -15390905 true "" "let americans ships with [american = true and class = 0]\nplot sum [hp] of americans"
-
-PLOT
-0
-307
-200
-457
-In-Air Strength
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"Japanese" 1.0 0 -8053223 true "" "plot count aircrafts with [american = false]"
-"American" 1.0 0 -16050907 true "" "plot count aircrafts with [american = true]"
-
-PLOT
-198
-307
-398
-457
-Total Air Strength
-NIL
-NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
