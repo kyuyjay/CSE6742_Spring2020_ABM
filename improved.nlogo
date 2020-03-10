@@ -29,6 +29,7 @@ globals [
   idx_nagaras
   idx_kageros
   tick-rate
+  patch-length
   teleport_ticks
   teleport_times
   teleport_time
@@ -38,10 +39,29 @@ globals [
   wave_launch
   flight-range-ticks
   flight-speed-patches
+  fleet-v
+  fleet-hp
+  fleet-thresh
+  fleet-escape
+  fleet-detect
+  fleet-engage
+  fleet-patrol
+  fleet-spawn
+  fleet-aa
+  fleet-cap
+  fleet-cap-commit
+  amagi-attk
+  tosa-attk
+  hiryu-attk
+  soryu-attk
   machine-gun-mult
   machine-gun-time
   cannon-time
   burst-time
+  r_global_amer
+  r_global_jap
+  p_fire
+  fire_dmg
 ]
 
 turtles-own [
@@ -69,55 +89,98 @@ turtles-own [
   breached
   defence_state
   group
+  ; Teleport
+  curr_tick
   ; Ships
   spawn_rate
   aa_rate
   max_cap
   cap_commit
   evade
-  ; Teleport
-  curr_tick
+  yorky
+  launched_planes
+  ; Japanese Ships
+  curr_attk_planes
+  max_attk_planes
+  ratio_zero
+  ratio_b5n
+  ratio_d3a
+  fire
   ;Planes
-  ;Guns on planes
   machine_gun_time
   cannon_fire_time
   burst_time
-  ;Flight Range
   flight_range
-  ; Yorktown
-  yorky
-  launched_planes
 ]
 
-; Create template
-; create-breed X [
-;  setxy 20 10
-;  set color green
-;  set size 3
-;  set heading 0
-;  ; Personal Parameters
-;  set v
-;  set hp
-;  set max_hp
-;  set flee_thresh
-;  set p_escape
-;  set idx
-;  ; Radii
-;  set r_detect
-;  set r_engage
-;  ; States
-;  set ship
-;  set offensive
-;  set class
-;  set engaged
-;  set flee
-;  set teleport
-;  set american
-;  ; Defence
-;  set breached
-;  set defence_state
-;  set group
-;]
+;create-planes X [
+;    setxy x y
+;    set color green
+;    set size 3
+;    set heading 0
+;    set idx idx_???
+;    ; Personal Parameters
+;    set v item idx fleet-v
+;    set hp item idx fleet-hp
+;    set max_hp idx fleet-hp
+;    set flee_thresh idx fleet-thresh
+;    set p_escape idx fleet-escape
+;    ; Radii
+;    set r_detect idx fleet-detect
+;    set r_engage idx fleet-engage
+;    ; States
+;    set ship false
+;    set offensive false
+;    set class 1
+;    set engaged false
+;    set flee false
+;    set teleport false
+;    set american false
+;    ; Defence
+;    set defence_state "Patrol"
+;    ; Planes
+;    set machine_gun_time item idx machine-gun-time
+;    set cannon_fire_time item idx cannon-time
+;    set burst_time item idx  burst-time
+;    set flight_range item idx flight-range-ticks
+;  ]
+
+;create-ships X [
+;    setxy x y
+;    set color red
+;    set size 8
+;    set heading 0
+;    set idx idx_???
+;    ; Personal Parameters
+;    set v item idx fleet-v
+;    set hp item idx fleet-hp
+;    set max_hp idx fleet-hp
+;    set flee_thresh idx fleet-thresh
+;    set p_escape idx fleet-escape
+;    ; Radii
+;    set r_detect idx fleet-detect
+;    set r_radar idx fleet-detect
+;    set r_engage idx fleet-engage
+;    ; States
+;    set ship false
+;    set offensive false
+;    set class 1
+;    set engaged false
+;    set flee false
+;    set teleport false
+;    set american false
+;    ; Defence
+;    set defence_state "Patrol"
+;    ; Ships
+;    set spawn_rate idx fleet-spawn
+;    set aa_rate idx fleet-aa
+;    set max_cap idx fleet-cap
+;    set cap_commit idx fleet-cap-commit
+;    set evade false
+;    set yorky false
+;    set launched_planes false
+;  ]
+
 
 directed-link-breed [chases chase]
 undirected-link-breed[battles battle]
@@ -167,7 +230,7 @@ to setup
   setup-teleport
   setup-sprites
   setup-idx
-  setup-plane-data
+  setup-params
   init-jap-fleet
   init-amer-fleet
   setup-p
@@ -200,9 +263,6 @@ to set-shape
 end
 
 to setup-idx
-  set wave_launch 0
-  set tick-rate 30
-  set teleport_time 200
   set idx_tbd_devs 0
   set idx_sbd_daunts 1
   set idx_tbf_aves 2
@@ -227,26 +287,67 @@ to setup-idx
   set idx_kageros 21
 end
 
-to setup-plane-data
+to setup-params
+  set wave_launch 0
+  set tick-rate 30
+  set patch-length 1
+  set teleport_time 200
+
   let flight-ranges-km [435 1115 1000 1000 2000 880 1100 0 0 0 840 608 1000 1162 0 0 0 0 0 0 0 0]
-  let flight-speed-kmh [250 240 230 240 240 240 240 0 0 0 300 300 300 333 0 0 0 0 0 0 0 0]
+  let flight-speed-kmh [205 296	245	426	291	248	0	0	0	0	294	258 0	331	0	0	0	0	0	0	0	0]
+
+  let fleet-detect-km [64	64	64	80	128	48	0	80	32	32	64	64	0	48	0	0	0	0	0	0	0	0]
+  let fleet-patrol-km [0	0	0	0	0	40 0	0	0	0	0	0	0	40	0	0	0	0	0	0	0	0]
+  let fleet-engage-km [0	0	0	0	0	0 0	0	0	0	0	0	0	0 0	0	0	0	0	0	0	0] ; TEMP
+
+  let fleet-spawn-sec [0	0	0	0	0	0 0	600 600	600 0 0 0 0 600 600	600	600	0	0	0	0] ; TEMP
+  let fleet-aarate-sec [0	0	0	0	0	0 0	2	2	2	0	0	0	0 2	2	2	2	0	0	0 0] ; TEMP
+
 
   set flight-speed-patches []
   set flight-range-ticks []
+  set fleet-v []
+
+  set fleet-detect []
+  set fleet-patrol []
+  set fleet-engage []
+
+  set fleet-spawn [] ;
+  set fleet-aa []
+
   let indexer ( range 0 length flight-ranges-km)
 
-  let km_per_patch .8
   foreach indexer [index ->
-    let fr_km item index flight-ranges-km
-    let sp_kmh item index flight-speed-kmh
-    let v_i_tick (sp_kmh * tick-rate) / (60 * 60 * km_per_patch)
-    let range_tick 0
-    if v_i_tick > 0 [
-      set range_tick (fr_km / km_per_patch) / v_i_tick
+    let _range item index flight-ranges-km
+    let _speed item index flight-speed-kmh
+
+    let speed-pati (_speed * tick-rate) / (60 * 60 * patch-length)
+    let range-tick 0
+    if speed-pati > 0 [
+      set range-tick (_range / patch-length) / speed-pati
     ]
 
-    set flight-speed-patches lput v_i_tick flight-speed-patches
-    set flight-range-ticks lput range_tick flight-range-ticks
+    let _v _speed / 435
+
+    let _detect (item index fleet-detect-km) / patch-length
+    let _patrol (item index fleet-patrol-km) / patch-length
+    let _engage (item index fleet-engage-km) / patch-length
+
+    let _spawn ceiling ((item index fleet-spawn-sec) / tick-rate)
+    let _aa ceiling ((item index fleet-aarate-sec) / tick-rate)
+
+
+    set flight-speed-patches lput speed-pati flight-speed-patches
+    set flight-range-ticks lput range-tick flight-range-ticks
+
+    set fleet-v lput _v fleet-v
+
+    set fleet-detect lput _detect fleet-detect
+    set fleet-patrol lput _patrol fleet-patrol
+    set fleet-engage lput _engage fleet-engage
+
+    set fleet-spawn lput _spawn fleet-spawn
+    set fleet-aa lput _aa fleet-aa
   ]
 
   set machine-gun-mult [1 1 1 1 1 1 1 0 0 0 1 1 1 .1 0 0 0 0 0 0 0 0]
@@ -254,6 +355,23 @@ to setup-plane-data
   set cannon-time [0 0 0 0 0 10 10 0 0 0 0 0 0 8 0 0 0 0 0 0 0 0]
   set burst-time [1.5 1.5 1.5 1.5 1.5 1.5 1.5 0 0 0 1.5 1.5 1.5 1.5 0 0 0 0 0 0 0 0]
 
+  set fleet-hp [100	100	100	100	100	100	0	100	100	100	100	100	0	100	100	100	100	100	100	100	100	100]
+  set fleet-thresh [20	20	20	20	20	20	0	20	20	20	20	20	0	20	20	20	20	20	20	20	20	20]
+  set fleet-escape [0	0	0	0	0	0 0	0	0	0	0	0	0	0 0	0	0	0	0	0	0	0] ; TEMP
+
+  set fleet-cap [0	0	0	0	0	0 0	20	20	20	0	0	0	0 20	20	20	20	0	0	0	0] ; TEMP
+  set fleet-cap-commit [0	0	0	0	0	0 0	50	50	50	0	0	0	0 50	50	50	50	0	0	0	0] ; TEMP
+
+  set amagi-attk [20 20 50 30] ; TEMP
+  set tosa-attk [20 20 50 30] ; TEMP
+  set hiryu-attk [20 20 50 30] ; TEMP
+  set soryu-attk [20 20 50 30] ; TEMP
+
+  set r_global_amer 80 ; TEMP
+  set r_global_jap 80 ; TEMP
+
+  set p_fire 50
+  set fire_dmg 0.1 * tick-rate ; TEMP
 end
 
 to setup-p
@@ -294,8 +412,7 @@ to setup-p
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];8 acruisers
                               [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];9 adestroyers
                               [0 0 0 0 0 20 0 60 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-    ; 20 at 7
-                              [0 0 0 0 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
+                              [0 0 0 0 0 20 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
                               [60 40 60 60 80 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];13 zeros
                               [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];14 amagis
@@ -333,28 +450,6 @@ to setup-p
                               [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];20 nagaras
                               [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];21 kageros
                                                                                        ]
-
-
-  ask turtles with [american = true] [
-    if class = 0 [
-      set spawn_rate 30
-    ]
-    set r_radar 30
-    set r_patrol 40
-    set cap_commit 50
-    set max_cap 20
-    set evade false
-  ]
-  ask turtles with [american = false] [
-    if class = 0 [
-      set spawn_rate 30
-    ]
-    set r_radar 30
-    set r_patrol 40
-    set cap_commit 80
-    set max_cap 20
-    set evade false
-  ]
   ask turtles [
     set curr_tick -1
   ]
@@ -401,16 +496,18 @@ to init-jap-fleet
     set color green
     set size 3
     set heading 0
-    ; Personal Parameters
-    set v 1
-    set hp 10
-    set max_hp 10
-    set flee_thresh 5
-    set p_escape 50
     set idx idx_zeros
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 15
-    set r_engage 5
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship false
     set offensive false
@@ -426,7 +523,6 @@ to init-jap-fleet
     set burst_time item idx  burst-time
     ;Flight Range
     set flight_range item idx flight-range-ticks
-    ;flight-speed-patches
   ]
   ; Carriers
   create-amagis 1 [
@@ -434,16 +530,18 @@ to init-jap-fleet
     set color red
     set size 8
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_amagis
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -452,23 +550,41 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Defence
+    set defence_state "Patrol"
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
+    ; Japenese Ships Only
+    set max_attk_planes item 0 amagi-attk
+    set curr_attk_planes item 0 amagi-attk
+    set ratio_zero item 1 amagi-attk
+    set ratio_b5n item 2 amagi-attk
+    set ratio_d3a item 3 amagi-attk
+    set fire false
   ]
   create-tosas 1 [
     setxy 20 -10
     set color red
     set size 8
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_tosas
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -477,22 +593,38 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
+    ; Japenese Ships Only
+    set max_attk_planes item 0 tosa-attk
+    set curr_attk_planes item 0 tosa-attk
+    set ratio_zero item 1 tosa-attk
+    set ratio_b5n item 2 tosa-attk
+    set ratio_d3a item 3 tosa-attk
+    set fire false
   ]
   create-soryus 1 [
     set color red
     set size 8
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_soryus
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -501,23 +633,41 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Defence
+    set defence_state "Patrol"
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
+    ; Japenese Ships Only
+    set max_attk_planes item 0 soryu-attk
+    set curr_attk_planes item 0 soryu-attk
+    set ratio_zero item 1 soryu-attk
+    set ratio_b5n item 2 soryu-attk
+    set ratio_d3a item 3 soryu-attk
+    set fire false
   ]
   create-hiryus 1 [
     setxy 20 10
     set color red
     set size 8
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_hiryus
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -526,7 +676,21 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
+    ; Japenese Ships Only
+    set max_attk_planes item 0 hiryu-attk
+    set curr_attk_planes item 0 hiryu-attk
+    set ratio_zero item 1 hiryu-attk
+    set ratio_b5n item 2 hiryu-attk
+    set ratio_d3a item 3 hiryu-attk
+    set fire false
   ]
   ; Screen
   create-kongos 1 [
@@ -534,16 +698,18 @@ to init-jap-fleet
     set color grey
     set size 5
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_kongos
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -552,6 +718,13 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
   ]
   create-tones 1 [
@@ -559,16 +732,18 @@ to init-jap-fleet
     set color grey
     set size 5
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_tones
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -577,6 +752,13 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
   ]
   create-nagaras 1 [
@@ -584,16 +766,18 @@ to init-jap-fleet
     set color grey
     set size 5
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_nagaras
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -602,6 +786,13 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
   ]
   create-kageros 1 [
@@ -609,16 +800,18 @@ to init-jap-fleet
     set color grey
     set size 5
     set heading 270
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_kageros
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -627,6 +820,13 @@ to init-jap-fleet
     set flee false
     set teleport false
     set american false
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
+    set yorky false
     set launched_planes false
   ]
 end
@@ -638,16 +838,18 @@ to init-amer-fleet
     set color yellow
     set size 8
     set heading 90
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_yorktowns
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -656,24 +858,35 @@ to init-amer-fleet
     set flee false
     set teleport false
     set american true
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
     set yorky false
     set launched_planes false
+    ; Placeholders
+    set max_attk_planes 1
+    set curr_attk_planes 0
   ]
   create-yorktowns 1 [
     setxy -150 -10
     set color yellow
     set size 8
     set heading 90
-    ; Personal Parameters
-    set v 0
-    set hp 100
-    set max_hp 100
-    set flee_thresh 0
-    set p_escape 0
     set idx idx_yorktowns
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
     ; Radii
-    set r_detect 120
-    set r_engage 30
+    set r_detect item idx fleet-detect
+    set r_radar item idx fleet-detect
+    set r_patrol item idx fleet-patrol
+    set r_engage item idx fleet-engage
     ; States
     set ship true
     set offensive false
@@ -682,8 +895,17 @@ to init-amer-fleet
     set flee false
     set teleport false
     set american true
+    ; Ships
+    set spawn_rate item idx fleet-spawn
+    set aa_rate item idx fleet-aa
+    set max_cap item idx fleet-cap
+    set cap_commit item idx fleet-cap-commit
+    set evade false
     set yorky false
     set launched_planes false
+    ; Placeholders
+    set max_attk_planes 1
+    set curr_attk_planes 0
   ]
 end
 
@@ -701,7 +923,7 @@ to go
   add_midway_waves
   add_attack_waves
   add-american-waves
-  in-yorktown
+  ; in-yorktown
   retreat
   cleanup
   if count ships with [american = true] = 0 [
@@ -778,81 +1000,6 @@ to build-teleport
   ]
 end
 
-to midway-wave
-  create-f4fs 6 [
-    setxy -47 -47
-    set color white
-    set size 3
-    set v 1
-    set hp 30
-    set r_detect 15
-    set r_engage 5
-    set flee_thresh 5
-    set p_escape 50
-    set engaged false
-    set flee false
-    set offensive true
-    set ship false
-    set class 1
-    set breached false
-    set group 0
-    set idx idx_f4fs
-    set machine_gun_time item idx machine-gun-time
-    set cannon_fire_time item idx cannon-time
-    set burst_time item idx  burst-time
-    ;Flight Range
-    set flight_range item idx flight-range-ticks
-    ]
-  create-sbd_daunts 3 [
-    setxy -45 -45
-    set color yellow
-    set size 3
-    set v 1
-    set hp 30
-    set r_detect 20
-    set r_engage 5
-    set flee_thresh 5
-    set p_escape 50
-    set engaged false
-    set flee false
-    set offensive true
-    set ship false
-    set class 0
-    set breached false
-    set group 0
-    set idx idx_sbd_daunts
-    set machine_gun_time item idx machine-gun-time
-    set cannon_fire_time item idx cannon-time
-    set burst_time item idx  burst-time
-    ;Flight Range
-    set flight_range item idx flight-range-ticks
-    ]
-  create-sbd_daunts 3 [
-    setxy 45 45
-    set color yellow
-    set size 3
-    set v 1
-    set hp 30
-    set r_detect 20
-    set r_engage 5
-    set flee_thresh 5
-    set p_escape 50
-    set engaged false
-    set flee false
-    set offensive true
-    set ship false
-    set class 0
-    set breached false
-    set group 0
-    set idx idx_sbd_daunts
-    set machine_gun_time item idx machine-gun-time
-    set cannon_fire_time item idx cannon-time
-    set burst_time item idx  burst-time
-    ;Flight Range
-    set flight_range item idx flight-range-ticks
-    ]
-end
-
 to retreat
   if count aircrafts with [class = 0 and flee = false and offensive = true and american = true] = 0 [
     ask aircrafts with  [class = 1 and offensive = true and american = true] [
@@ -872,9 +1019,18 @@ end
 to cleanup
   ask ships [
     set label round hp
+    if fire = true [
+      set hp hp - fire_dmg
+      set color orange
+      set label "FIRE"
+    ]
   ]
   ask aircrafts [
     set label ""
+  ]
+  ask aircrafts with [flight_range <= 0][
+    ; print "died due to range"
+    die
   ]
   ask turtles [
     if hp <= 0 [
@@ -890,7 +1046,6 @@ to cleanup
       die
     ]
   ]
-  kill_planes_range
   ask motherships [hide-link]
 end
 
@@ -900,10 +1055,10 @@ to disengage
   ask offense [
   ;TODO change logic for bombers? Since bombers should not try to disengage if they uhm dont have anything to worry about
   ; ADD in logic for flight ranger here maybe?
-  if hp < flee_thresh or (machine_gun_time <= 0 and cannon_fire_time <= 0) or flee = true[
-    set engaged false
-    set flee true
-    if random 100 > p_escape and class = 1[
+    if hp < flee_thresh or (machine_gun_time <= 0 and cannon_fire_time <= 0) or flee = true [
+      set engaged false
+      set flee true
+      if random 100 > p_escape and class = 1 [
         die
       ]
     ]
@@ -913,16 +1068,20 @@ end
 to engage
   ;print "engage"
   ask ships with [class = 0] [
-    let one-american american
-    ifelse count aircrafts with [american != one-american] in-radius r_radar > 0 [
-      set evade true
-      set color grey
-    ][
-      set evade false
-      ifelse one-american = false [
-        set color red
-      ] [
+    ifelse american = true [
+      ifelse fire = false and count (aircrafts with [american = false and distancexy -150 0 < r_global_amer]) > 0 [
+        set evade true
+        set color grey
+      ][
         set color yellow
+      ]
+    ]
+    [
+      ifelse fire = false and count (aircrafts with [american = true and distancexy 0 0 < r_global_jap]) > 0 [
+        set evade true
+        set color grey
+      ][
+        set color red
       ]
     ]
   ]
@@ -958,6 +1117,7 @@ to engage
         ;print idx
         ;print [idx] of target
         if random 100 < (matrix:get p-hit idx [idx] of target) [
+          print "HITHITHIT"
           ; Triangular Distribution
           let dmg 0
           let F (matrix:get p-dmg idx [idx] of target) / 100
@@ -971,6 +1131,10 @@ to engage
           ;print(dmg)
           ask target [
             set hp hp - (dmg * [max_hp] of target / 100)
+            if class = 0 and random 100 < p_fire * (curr_attk_planes / max_attk_planes) [
+              set fire true
+              print "FIREFIREFIRE"
+            ]
           ]
         ]
         if class = 0 [
@@ -981,13 +1145,6 @@ to engage
     ]
   ]
   ;print "engaged"
-end
-
-to kill_planes_range
-  ask aircrafts with [flight_range <= 0][
-    ; print "died due to range"
-    die
-  ]
 end
 
 to move
@@ -1013,13 +1170,13 @@ to move
   ; Have all Fleeing Aircraft go somewhere
   ; If no Mothership, give up and go to patch 0
   ask fleeing_aircraft [
-    ifelse count my-out-motherships > 0[
+    ifelse count my-out-motherships > 0 [
       let mamaship one-of my-out-motherships
       let mamashipero [end2] of mamaship
       let evading [evade] of  mamashipero
       face mamashipero
-      if evading = false and count out-mothership-neighbors in-radius 4 > 0[
-       if offensive = false[
+      if evading = false and count out-mothership-neighbors in-radius 4 > 0 [
+       if offensive = false [
          ask mamashipero [
             set max_cap max_cap + 1
           ]
@@ -1027,13 +1184,13 @@ to move
        die
       ]
     ][
-      if offensive = true[
+      if offensive = true [
         face patch 200 0
       ]
-      if american = false and offensive = false[
+      if american = false and offensive = false [
         face patch 200 0
       ]
-      if american = true and offensive = false[
+      if american = true and offensive = false [
         face patch -100 0
       ]
     ]
@@ -1092,17 +1249,17 @@ to move
     let patrol_x 0
     let patrol_y 0
     let one_american american
+    set r_radar r_global_jap
     if one_american = true [
       set patrol_x -150
       set patrol_y 0
+      set r_radar r_global_amer
     ]
-    set r_radar [r_radar] of min-one-of ships with [american = american and class = 0] [distance myself]
-    set r_patrol [r_patrol] of min-one-of ships with [american = american and class = 0] [distance myself]
     set cap_commit [cap_commit] of min-one-of ships with [american = american and class = 0] [distance myself]
     let new_offense offense
     let curr_radar r_radar
     ask offense [
-      set new_offense offense with [(distancexy patrol_x patrol_y) < curr_radar and breached = false and american != one_american]
+      set new_offense offense with [(distancexy patrol_x patrol_y) < curr_radar and breached = false and american != one_american and idx != idx_b17s]
     ]
     if count new_offense > 0 [
       ; Take only the first one, one breach processed per tick
@@ -1145,7 +1302,7 @@ to move
         ]
         [
           ; head in a circle using quickmaths
-          set heading atan (xcor - patrol_x) (ycor - patrol_y) + 90
+          set heading atan (xcor - patrol_x + 1) (ycor - patrol_y + 1) + 90
         ]
       ]
       set flight_range flight_range - 1
@@ -1159,7 +1316,7 @@ to move
 
     if defence_state = "Investigate" and engaged = false and flee = false [
       let one-american american
-      set offense aircrafts with [offensive = true and american != one-american]
+      set offense aircrafts with [offensive = true and american != one-american and idx != idx_b17s]
       if count offense in-radius r_detect > 0 [
         set defence_state "Intercept"
       ]
@@ -1175,7 +1332,7 @@ to move
 
     if defence_state = "Intercept" and engaged = false and flee = false [
       let one-american american
-      set offense aircrafts with [offensive = true and american != one-american]
+      set offense aircrafts with [offensive = true and american != one-american and idx != idx_b17s]
       if count my-out-chases = 0 [
         let detected offense in-radius r_detect
         ;print(detected)
@@ -1213,7 +1370,7 @@ to move
 end
 
 to spawn
-  foreach sort ships with [spawn_rate > 0 and max_cap > 0 and ticks mod spawn_rate = 0] [one-ship ->
+  foreach sort ships with [spawn_rate > 0 and max_cap > 0 and ticks mod spawn_rate = 0 and (ticks < 165 or ticks > 195) ] [one-ship ->
     let x 0
     let y 0
     let one-cap 0
@@ -1235,16 +1392,18 @@ to spawn
           set color green
           set size 3
           set heading 0
-          ; Personal Parameters
-          set v 1
-          set hp 10
-          set max_hp 10
-          set flee_thresh 5
-          set p_escape 50
           set idx idx_zeros
+          ; Personal Parameters
+          set v item idx fleet-v
+          set hp item idx fleet-hp
+          set max_hp item idx fleet-hp
+          set flee_thresh item idx fleet-thresh
+          set p_escape item idx fleet-escape
           ; Radii
-          set r_detect 15
-          set r_engage 5
+          set r_detect item idx fleet-detect
+          set r_radar item idx fleet-detect
+          set r_patrol item idx fleet-patrol
+          set r_engage item idx fleet-engage
           ; States
           set ship false
           set offensive false
@@ -1257,7 +1416,7 @@ to spawn
           set defence_state "Patrol"
           set machine_gun_time item idx machine-gun-time
           set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
+          set burst_time item idx burst-time
           ;Flight Range
           set flight_range item idx flight-range-ticks
           create-mothership-to one-ship
@@ -1269,16 +1428,18 @@ to spawn
           set color white
           set size 3
           set heading 0
-          ; Personal Parameters
-          set v 1
-          set hp 10
-          set max_hp 10
-          set flee_thresh 5
-          set p_escape 50
           set idx idx_f4fs
+          ; Personal Parameters
+          set v item idx fleet-v
+          set hp item idx fleet-hp
+          set max_hp item idx fleet-hp
+          set flee_thresh item idx fleet-thresh
+          set p_escape item idx fleet-escape
           ; Radii
-          set r_detect 15
-          set r_engage 5
+          set r_detect item idx fleet-detect
+          set r_radar item idx fleet-detect
+          set r_patrol item idx fleet-patrol
+          set r_engage item idx fleet-engage
           ; States
           set ship false
           set offensive false
@@ -1404,12 +1565,24 @@ end
 to antiair
   ask ships [
     let one-american american
-    let offense aircrafts with [offensive = true and american != one-american]
-    foreach sort offense in-radius r_engage [target ->
-      if random 100 < matrix:get p-hit idx [idx] of target [
-        let dmg random (matrix:get p-dmg idx [idx] of target) * max_hp / 100
-        ask target [
-          set hp hp - dmg
+    if aa_rate > 0 and ticks mod aa_rate = 0 [
+      let offense aircrafts with [offensive = true and american != one-american]
+      foreach sort offense in-radius r_engage [target ->
+        if random 100 < (matrix:get p-hit idx [idx] of target) [
+          ; Triangular Distribution
+          let dmg 0
+          let F (matrix:get p-dmg idx [idx] of target) / 100
+          let U random-float 1
+          ifelse U < F [
+            set dmg sqrt (U * 100 * (matrix:get p-dmg idx [idx] of target))
+          ] [
+            set dmg 100 - sqrt ((1 - U) * 100 * (100 - (matrix:get p-dmg idx [idx] of target)))
+          ]
+          ;print("damage")
+          ;print(dmg)
+          ask target [
+            set hp hp - (dmg * [max_hp] of target / 100)
+          ]
         ]
       ]
     ]
@@ -1502,15 +1675,104 @@ to add_attack_waves
   set aircrafts turtles with [ship = false]
 end
 
+to midway-wave
+  create-f4fs 6 [
+    setxy -47 -47
+    set color white
+    set size 3
+    set idx idx_f4fs
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
+    ; Radii
+    set r_detect item idx fleet-detect
+    set r_engage item idx fleet-engage
+    ; States
+    set ship false
+    set offensive true
+    set class 1
+    set engaged false
+    set flee false
+    set teleport false
+    set american true
+    ; Weapons
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
+    ]
+  create-sbd_daunts 3 [
+    setxy -45 -45
+    set color yellow
+    set size 3
+    set idx idx_sbd_daunts
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
+    ; Radii
+    set r_detect item idx fleet-detect
+    set r_engage item idx fleet-engage
+    ; States
+    set ship false
+    set offensive true
+    set class 1
+    set engaged false
+    set flee false
+    set teleport false
+    set american true
+    ; Weapons
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
+    ]
+  create-sbd_daunts 3 [
+    setxy 45 45
+    set color yellow
+    set size 3
+    set idx idx_sbd_daunts
+    ; Personal Parameters
+    set v item idx fleet-v
+    set hp item idx fleet-hp
+    set max_hp item idx fleet-hp
+    set flee_thresh item idx fleet-thresh
+    set p_escape item idx fleet-escape
+    ; Radii
+    set r_detect item idx fleet-detect
+    set r_engage item idx fleet-engage
+    ; States
+    set ship false
+    set offensive true
+    set class 1
+    set engaged false
+    set flee false
+    set teleport false
+    set american true
+    ; Weapons
+    set machine_gun_time item idx machine-gun-time
+    set cannon_fire_time item idx cannon-time
+    set burst_time item idx  burst-time
+    ;Flight Range
+    set flight_range item idx flight-range-ticks
+    ]
+end
+
 to add_midway_waves
-  let wave_2 70	* (60 / tick-rate)
-  let wave_3 113 * (60 / tick-rate)
-  let wave_4 130 * (60 / tick-rate)
-  let wave_5 147 * (60 / tick-rate)
-  let wave_6 198 * (60 / tick-rate)
-  let wave_7 220 * (60 / tick-rate)
-  let wave_8 250 * (60 / tick-rate)
-  let wave_9 260 * (60 / tick-rate)
+  let wave_2 75	* (60 / tick-rate)
+  let wave_3 98 * (60 / tick-rate)
+  let wave_4 115 * (60 / tick-rate)
+  let wave_5 132 * (60 / tick-rate)
+  let wave_6 165 * (60 / tick-rate)
+  let wave_7 187 * (60 / tick-rate)
+  let wave_8 217 * (60 / tick-rate)
   if ticks = wave_2 [
     create-tbd_devs 3 [
       setxy -45 -45
@@ -1999,83 +2261,6 @@ to add_midway_waves
         ]
       ]
     ]
-     if ticks = wave_9[
-      let indexer ( range 0 6 )
-      let bombIndexer ( range 0 5 )
-
-      foreach bombIndexer [ ind ->
-        let ycoord (30 + 1 * ind)
-        let xcoord (42 + 2 * ind)
-        create-tbd_devs 1 [
-          setxy xcoord ycoord
-          set color yellow
-          set size 3
-          ; Personal Parameters
-          set v 1
-          set hp 30
-          set max_hp 30
-          set flee_thresh 5
-          set p_escape 50
-          set idx idx_tbd_devs
-          ; Radii
-          set r_detect 20
-          set r_engage 5
-          ; States
-          set ship false
-          set offensive true
-          set class 0
-          set engaged false
-          set flee false
-          set teleport false
-          set american true
-          ; Defence
-          set breached false
-          set group 4
-          set machine_gun_time item idx machine-gun-time
-          set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
-          ;Flight Range
-          set flight_range item idx flight-range-ticks
-        ]
-      ]
-      foreach indexer [ ind ->
-        let ycoord (30 + 1 * ind)
-        let xcoord (42 + 2 * ind)
-        create-f4fs 1 [
-          setxy xcoord ycoord
-          set color white
-          set size 3
-          ; Personal Parameters
-          set v 1
-          set hp 30
-          set max_hp 30
-          set flee_thresh 5
-          set p_escape 50
-          set idx idx_f4fs
-          ; Radii
-          set r_detect 15
-          set r_engage 5
-          ; States
-          set ship false
-          set offensive true
-          set class 1
-          set engaged false
-          set flee false
-          set teleport false
-          set american true
-          ; Defence
-          set breached false
-          set group 4
-          set machine_gun_time item idx machine-gun-time
-          set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
-          ;Flight Range
-          set flight_range item idx flight-range-ticks
-        ]
-      ]
-    ]
-
-
  set aircrafts turtles with [ship = false]
 
 
