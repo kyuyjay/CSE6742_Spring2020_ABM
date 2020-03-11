@@ -40,6 +40,7 @@ globals [
   flight-range-ticks
   flight-speed-patches
   fleet-v
+  approach-v
   fleet-hp
   fleet-thresh
   fleet-escape
@@ -62,6 +63,11 @@ globals [
   r_global_jap
   p_fire
   fire_dmg
+  approach-vulneraby-mult
+  japanese_launch_progress_per_tick
+  japanese_launch_wait_time
+  japanese_launch_check_time
+  japanese_minimum_wave_size
 ]
 
 turtles-own [
@@ -111,6 +117,12 @@ turtles-own [
   cannon_fire_time
   burst_time
   flight_range
+  on_approach
+  ;lanching
+  launch_progress
+  launch_progress_per_tick
+  launch_wait_time
+  launch_check_time
 ]
 
 ;create-planes X [
@@ -234,6 +246,16 @@ to setup
   init-jap-fleet
   init-amer-fleet
   setup-p
+
+  ;TODO MOVE THIS
+  create-turtles 1 [
+    setxy -76 40
+    set shape "airplane 2"
+    set color orange
+    set heading 90
+    set size 3
+    set hp 1000
+  ]
   reset-ticks
 end
 
@@ -295,11 +317,14 @@ to setup-params
 
   let flight-ranges-km [435 1115 1000 1000 2000 880 1100 0 0 0 840 608 1000 1162 0 0 0 0 0 0 0 0]
   let flight-speed-kmh [205 296	245	426	291	248	0	0	0	0	294	258 0	331	0	0	0	0	0	0	0	0]
+  let approach-speed-kmh [185	153	185	185	291	248	0	0	0	0	294	333	0	331	0	0	0	0	0	0	0	0]
+
+  ;TODO, will only be defined when
+  set approach-vulneraby-mult [1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
 
   let fleet-detect-km [64	64	64	80	128	48	0	80	32	32	64	64	0	48	0	0	0	0	0	0	0	0]
   let fleet-patrol-km [0	0	0	0	0	40 0	0	0	0	0	0	0	40	0	0	0	0	0	0	0	0]
-  let fleet-engage-km [0	0	0	0	0	0 0	0	0	0	0	0	0	0 0	0	0	0	0	0	0	0] ; TEMP
-
+  let fleet-engage-km [1 1.6 1 1 0 1 0 0 0 0 1.6 1 0 1 0 0 0 0 0 0 0 0] ; TEMP
   let fleet-spawn-sec [0	0	0	0	0	0 0	600 600	600 0 0 0 0 600 600	600	600	0	0	0	0] ; TEMP
   let fleet-aarate-sec [0	0	0	0	0	0 0	2	2	2	0	0	0	0 2	2	2	2	0	0	0 0] ; TEMP
 
@@ -307,12 +332,14 @@ to setup-params
   set flight-speed-patches []
   set flight-range-ticks []
   set fleet-v []
+  set approach-v []
+
 
   set fleet-detect []
   set fleet-patrol []
   set fleet-engage []
 
-  set fleet-spawn [] ;
+  set fleet-spawn []
   set fleet-aa []
 
   let indexer ( range 0 length flight-ranges-km)
@@ -320,6 +347,7 @@ to setup-params
   foreach indexer [index ->
     let _range item index flight-ranges-km
     let _speed item index flight-speed-kmh
+    let _approach_speed item index approach-speed-kmh
 
     let speed-pati (_speed * tick-rate) / (60 * 60 * patch-length)
     let range-tick 0
@@ -328,6 +356,7 @@ to setup-params
     ]
 
     let _v _speed / 435
+    let _approachv _approach_speed / 435
 
     let _detect (item index fleet-detect-km) / patch-length
     let _patrol (item index fleet-patrol-km) / patch-length
@@ -341,6 +370,7 @@ to setup-params
     set flight-range-ticks lput range-tick flight-range-ticks
 
     set fleet-v lput _v fleet-v
+    set approach-v lput _approachv approach-v
 
     set fleet-detect lput _detect fleet-detect
     set fleet-patrol lput _patrol fleet-patrol
@@ -372,6 +402,11 @@ to setup-params
 
   set p_fire 50
   set fire_dmg 0.1 * tick-rate ; TEMP
+
+  set japanese_launch_progress_per_tick .2 ; How many planes launched per tick ; TEMP
+  set japanese_launch_wait_time 10 / (tick-rate / 60) ; how many ticks to wait for stuff
+  set japanese_launch_check_time 10 / (tick-rate / 60)  ; just a variable for how long it takes to reset
+  set japanese_minimum_wave_size 4 ; just a var for now
 end
 
 to setup-p
@@ -567,6 +602,10 @@ to init-jap-fleet
     set ratio_b5n item 2 amagi-attk
     set ratio_d3a item 3 amagi-attk
     set fire false
+    set launch_progress 0
+    set launch_progress_per_tick japanese_launch_progress_per_tick
+    set launch_wait_time japanese_launch_wait_time
+    set launch_check_time japanese_launch_check_time
   ]
   create-tosas 1 [
     setxy 20 -10
@@ -608,6 +647,10 @@ to init-jap-fleet
     set ratio_b5n item 2 tosa-attk
     set ratio_d3a item 3 tosa-attk
     set fire false
+    set launch_progress 0
+    set launch_progress_per_tick japanese_launch_progress_per_tick
+    set launch_wait_time japanese_launch_wait_time
+    set launch_check_time japanese_launch_check_time
   ]
   create-soryus 1 [
     set color red
@@ -650,6 +693,10 @@ to init-jap-fleet
     set ratio_b5n item 2 soryu-attk
     set ratio_d3a item 3 soryu-attk
     set fire false
+    set launch_progress 0
+    set launch_progress_per_tick japanese_launch_progress_per_tick
+    set launch_wait_time japanese_launch_wait_time
+    set launch_check_time japanese_launch_check_time
   ]
   create-hiryus 1 [
     setxy 20 10
@@ -691,6 +738,10 @@ to init-jap-fleet
     set ratio_b5n item 2 hiryu-attk
     set ratio_d3a item 3 hiryu-attk
     set fire false
+    set launch_progress 0
+    set launch_progress_per_tick japanese_launch_progress_per_tick
+    set launch_wait_time japanese_launch_wait_time
+    set launch_check_time japanese_launch_check_time
   ]
   ; Screen
   create-kongos 1 [
@@ -920,7 +971,7 @@ to go
   teleports
   spawn
   antiair
-  add_midway_waves
+  add-midway-waves
   add_attack_waves
   add-american-waves
   ; in-yorktown
@@ -933,6 +984,21 @@ to go
   if count ships with [american = false] = 0 [
     user-message "Japanese Fleet Destroyed"
     stop
+  ]
+  if ticks mod 2 = 0 [
+    ask patches with [pxcor = -65 and pycor = 45] [
+      set plabel "Time to Iron Fist"
+      set plabel-color black
+    ]
+    ask patches with [pxcor = -70 and pycor = 40] [
+      ifelse 540 - ticks >= 0[
+        set plabel (540 - ticks) / 2
+        set plabel-color black
+      ][
+        set plabel "Now"
+        set plabel-color black
+      ]
+    ]
   ]
   tick
 end
@@ -1073,6 +1139,7 @@ to engage
         set evade true
         set color grey
       ][
+        set evade false
         set color yellow
       ]
     ]
@@ -1081,6 +1148,7 @@ to engage
         set evade true
         set color grey
       ][
+        set evade false
         set color red
       ]
     ]
@@ -1105,17 +1173,20 @@ to engage
       create-battle-with target
     ]
     if class = 0 or (class = 1 and count defence_air in-radius r_engage = 0) [
-;      if one-american = false[
-;        ;print defence_ship
-;        ;print r_engage
-;      ]
+      if class = 0 and flee = false and count defence_ship in-radius r_detect > 0 [
+         ;print("setting speed different")
+         set v item idx approach-v
+         set on_approach true
+      ]
       if count defence_ship in-radius r_engage > 0 [
         ;print "dropping bomb"
         let target min-one-of defence_ship [distance myself]
-        ;print self
-        ;print matrix:get p-hit idx [idx] of target
-        ;print idx
-        ;print [idx] of target
+;        if one-american = false[
+;          print self
+;          print matrix:get p-hit idx [idx] of target
+;          print idx
+;          print [idx] of target
+;        ]
         if random 100 < (matrix:get p-hit idx [idx] of target) [
           print "HITHITHIT"
           ; Triangular Distribution
@@ -1138,8 +1209,10 @@ to engage
           ]
         ]
         if class = 0 [
-          ;print("dropped bomb")
+          print("dropped bomb")
+          set v item idx fleet-v
           set flee true
+          set on_approach false
         ]
       ]
     ]
@@ -1161,6 +1234,10 @@ to move
   ]
   ask aircrafts with [class = 1 and (flight_range <= 100 or (machine_gun_time <= 0 and cannon_fire_time <= 0))][
     set flee true
+;    if machine_gun_time <= 0 and cannon_fire_time <= 0 [
+;      print ("YAYy")
+;      print american
+;    ]
   ]
 
   let offense aircrafts with [offensive = true]
@@ -1176,9 +1253,13 @@ to move
       let evading [evade] of  mamashipero
       face mamashipero
       if evading = false and count out-mothership-neighbors in-radius 4 > 0 [
-       if offensive = false [
+       ifelse offensive = false [
          ask mamashipero [
             set max_cap max_cap + 1
+          ]
+        ][
+           ask mamashipero [
+            set curr_attk_planes curr_attk_planes + 1
           ]
         ]
        die
@@ -1483,8 +1564,15 @@ to dogfight
     let defender_cannon [cannon_fire_time] of defender
     let defender_id [idx] of defender
 
+    ;Set the Defender multiplier for Manuvering?
+    let defender_vulnerability_multiplier 1
+    ask defender [
+      if class = 0 and on_approach = true [
+        set defender_vulnerability_multiplier item idx approach-vulneraby-mult
+      ]
+    ]
     ; Attacker Attacks
-    if (random 100 < matrix:get p-manu attacker_id defender_id)[
+    if (random 100 < (matrix:get p-manu attacker_id defender_id) * defender_vulnerability_multiplier)[
       if (random 100 < matrix:get p-hit attacker_id defender_id) and (attacker_m_gun > 0 or attacker_cannon > 0)[
         let mult 1
         if attacker_cannon <= 0 [
@@ -1500,10 +1588,15 @@ to dogfight
         ]
         let hp_loss mult * dmg * defender_max_hp / 100
         ask defender [set hp hp - hp_loss]
-        ask attacker [
-          set machine_gun_time machine_gun_time - burst_time
-          set cannon_fire_time cannon_fire_time - burst_time
-        ]
+      ]
+      ask attacker [
+;        print(machine_gun_time)
+;        if machine_gun_time < 10 [
+;          print ("heh")
+;        ]
+        set machine_gun_time machine_gun_time - burst_time
+        set cannon_fire_time cannon_fire_time - burst_time
+;       print(machine_gun_time)
       ]
     ]
 
@@ -1524,10 +1617,10 @@ to dogfight
         ]
         let hp_loss mult * dmg * attacker_max_hp / 100
         ask attacker [set hp hp - hp_loss]
-        ask defender [
-          set machine_gun_time machine_gun_time - burst_time
-          set cannon_fire_time cannon_fire_time - burst_time
-        ]
+      ]
+     ask defender [
+        set machine_gun_time machine_gun_time - burst_time
+        set cannon_fire_time cannon_fire_time - burst_time
       ]
     ]
 
@@ -1591,84 +1684,143 @@ end
 
 to add_attack_waves
   let wave_init toa * (60 / tick-rate); Time of Attack Slider
-  if wave_launch = 0 [
-    set wave_launch wave_init
-  ]
-  ask ships with [american = false and class = 0] [
-    if ticks = wave_launch [
+  if ticks >= wave_init [
+    ask ships with [american = false and class = 0] [
       let ship_var self
-      ifelse evade = false [
+      ifelse evade = true or launch_progress = curr_attk_planes[
         if launched_planes = false[
-        hatch-b5ns 15 [
-          set color black
-          set size 3
-          ; Personal Parameters
-          set v 1
-          set hp 30
-          set max_hp 30
-          set flee_thresh 5
-          set p_escape 50
-          set idx idx_b5ns
-          ; Radii
-          set r_detect 20
-          set r_engage 5
-          ; States
-          set ship false
-          set offensive true
-          set class 0
-          set engaged false
-          set flee false
-          set teleport false
-          set american false
-          ; Defence
-          set breached false
-          set group -1
-          ; Teleport
-          set curr_tick -1
-          set machine_gun_time item idx machine-gun-time
-          set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
-          ;Flight Range
-          set flight_range item idx flight-range-ticks
-          create-mothership-to ship_var
-        ]
-        hatch-zeros 6 [
-          set color green
-          set size 3
-          ; Personal Parameters
-          set v 1
-          set hp 30
-          set max_hp 30
-          set flee_thresh 5
-          set p_escape 50
-          set idx idx_zeros
-          ; Radii
-          set r_detect 20
-          set r_engage 5
-          ; States
-          set ship false
-          set offensive true
-          set class 1
-          set engaged false
-          set flee false
-          set teleport false
-          set american false
-          ; Defence
-          set breached false
-          set group -1
-          ; Teleport
-          set curr_tick -1
-          set machine_gun_time item idx machine-gun-time
-          set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
-          ;Flight Range
-          set flight_range item idx flight-range-ticks
-          create-mothership-to ship_var
-        ]
-          set launched_planes true
+          let ratio launch_progress / curr_attk_planes
+          let b5ns_to_launch  round(ratio * ratio_b5n * curr_attk_planes / 100) ; divide by 100 because ship ratios are in non decimal amounts
+          let zeros_to_launch round(ratio * ratio_zero * curr_attk_planes / 100)
+          let d3as_to_launch round(ratio * ratio_d3a * curr_attk_planes / 100)
+          print("wave launch")
+          ; Use a minimum to ensure that rounding doesn't somehow cause us to exceed the number of attack planes
+          ; While it shouldn't be possible, better safe
+          let total_planes_to_launch min(list (d3as_to_launch + zeros_to_launch  + b5ns_to_launch) curr_attk_planes)
+
+          ;As long as we have greater than some minimum
+          if total_planes_to_launch >= japanese_minimum_wave_size [
+            hatch-b5ns b5ns_to_launch [
+              set color black
+              set size 3
+              ; Personal Parameters
+              set idx idx_b5ns
+              set v item idx fleet-v
+              set hp item idx fleet-hp
+              set max_hp item idx fleet-hp
+              set flee_thresh item idx fleet-thresh
+              set p_escape item idx fleet-escape
+              ; Radii
+              set r_detect item idx fleet-detect
+              set r_radar item idx fleet-detect
+              set r_patrol item idx fleet-patrol
+              set r_engage item idx fleet-engage
+              ; States
+              set ship false
+              set offensive true
+              set class 0
+              set engaged false
+              set flee false
+              set teleport false
+              set american false
+              set on_approach false
+              ; Defence
+              set breached false
+              set group -1
+              ; Teleport
+              set curr_tick -1
+              set machine_gun_time item idx machine-gun-time
+              set cannon_fire_time item idx cannon-time
+              set burst_time item idx  burst-time
+              ;Flight Range
+              set flight_range item idx flight-range-ticks
+              create-mothership-to ship_var
+            ]
+            hatch-d3as d3as_to_launch [
+              set color black
+              set size 3
+              ; Personal Parameters
+              set idx idx_d3as
+
+              set v item idx fleet-v
+              set hp item idx fleet-hp
+              set max_hp item idx fleet-hp
+              set flee_thresh item idx fleet-thresh
+              set p_escape item idx fleet-escape
+              ; Radii
+              set r_detect item idx fleet-detect
+              set r_radar item idx fleet-detect
+              set r_patrol item idx fleet-patrol
+              set r_engage item idx fleet-engage
+              ; States
+              set ship false
+              set offensive true
+              set class 0
+              set engaged false
+              set flee false
+              set teleport false
+              set american false
+              set on_approach false
+              ; Defence
+              set breached false
+              set group -1
+              ; Teleport
+              set curr_tick -1
+              set machine_gun_time item idx machine-gun-time
+              set cannon_fire_time item idx cannon-time
+              set burst_time item idx  burst-time
+              ;Flight Range
+              set flight_range item idx flight-range-ticks
+              create-mothership-to ship_var
+            ]
+            hatch-zeros zeros_to_launch [
+              set color green
+              set size 3
+              ; Personal Parameters
+              set idx idx_zeros
+              set v item idx fleet-v
+              set hp item idx fleet-hp
+              set max_hp item idx fleet-hp
+              set flee_thresh item idx fleet-thresh
+              set p_escape item idx fleet-escape
+              ; Radii
+              set r_detect item idx fleet-detect
+              set r_radar item idx fleet-detect
+              set r_patrol item idx fleet-patrol
+              set r_engage item idx fleet-engage
+              ; States
+              set ship false
+              set offensive true
+              set class 1
+              set engaged false
+              set flee false
+              set teleport false
+              set american false
+              ; Defence
+              set breached false
+              set group -1
+              ; Teleport
+              set curr_tick -1
+              set machine_gun_time item idx machine-gun-time
+              set cannon_fire_time item idx cannon-time
+              set burst_time item idx  burst-time
+              ;Flight Range
+              set flight_range item idx flight-range-ticks
+              create-mothership-to ship_var
+            ]
+            set launch_progress 0
+            set curr_attk_planes curr_attk_planes - total_planes_to_launch
           ]
+          set launched_planes true
+          set launch_wait_time launch_check_time
+        ]
       ][
-        set wave_launch wave_launch + 200
+        set launched_planes false
+        ifelse launch_wait_time > 0[
+          set launch_wait_time launch_wait_time - 1
+        ][
+          set launch_progress launch_progress + launch_progress_per_tick
+        ]
       ]
     ]
   ]
@@ -1727,6 +1879,7 @@ to midway-wave
     set flee false
     set teleport false
     set american true
+    set on_approach false
     ; Weapons
     set machine_gun_time item idx machine-gun-time
     set cannon_fire_time item idx cannon-time
@@ -1751,6 +1904,7 @@ to midway-wave
     ; States
     set ship false
     set offensive true
+    set on_approach false
     set class 1
     set engaged false
     set flee false
@@ -1837,6 +1991,7 @@ to add-midway-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 3
@@ -1872,6 +2027,7 @@ to add-midway-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 3
@@ -1915,6 +2071,7 @@ to add-midway-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -1990,6 +2147,7 @@ to add-midway-waves
           set flee false
           set teleport false
           set american true
+          set on_approach false
           ; Defence
           set breached false
           set group 4
@@ -2043,37 +2201,38 @@ to add-midway-waves
       foreach bombIndexer [ ind ->
         let ycoord (30 + 1 * ind)
         let xcoord (42 + 2 * ind)
-        create-tbd_devs 1 [
-          setxy xcoord ycoord
-          set color yellow
-          set size 3
-          ; Personal Parameters
-          set v 1
-          set hp 30
-          set max_hp 30
-          set flee_thresh 5
-          set p_escape 50
-          set idx idx_tbd_devs
-          ; Radii
-          set r_detect 20
-          set r_engage 5
-          ; States
-          set ship false
-          set offensive true
-          set class 0
-          set engaged false
-          set flee false
-          set teleport false
-          set american true
-          ; Defence
-          set breached false
-          set group 4
-          set machine_gun_time item idx machine-gun-time
-          set cannon_fire_time item idx cannon-time
-          set burst_time item idx  burst-time
-          ;Flight Range
-          set flight_range item idx flight-range-ticks
-        ]
+      create-tbd_devs 1 [
+        setxy xcoord ycoord
+        set color yellow
+        set size 3
+        ; Personal Parameters
+        set v 1
+        set hp 30
+        set max_hp 30
+        set flee_thresh 5
+        set p_escape 50
+        set idx idx_tbd_devs
+        ; Radii
+        set r_detect 20
+        set r_engage 5
+        ; States
+        set ship false
+        set offensive true
+        set class 0
+        set engaged false
+        set flee false
+        set teleport false
+        set american true
+        set on_approach false
+        ; Defence
+        set breached false
+        set group 4
+        set machine_gun_time item idx machine-gun-time
+        set cannon_fire_time item idx cannon-time
+        set burst_time item idx  burst-time
+        ;Flight Range
+        set flight_range item idx flight-range-ticks
+      ]
       ]
       foreach indexer [ ind ->
         let ycoord (30 + 1 * ind)
@@ -2140,6 +2299,7 @@ to add-midway-waves
           set flee false
           set teleport false
           set american true
+        set on_approach false
           ; Defence
           set breached false
           set group 4
@@ -2215,6 +2375,7 @@ to add-midway-waves
           set flee false
           set teleport false
           set american true
+        set on_approach false
           ; Defence
           set breached false
           set group 4
@@ -2267,7 +2428,7 @@ to add-midway-waves
 end
 
 to add-american-waves
-  let wave_1 800
+  let wave_1 540
   if ticks = wave_1[
     let indexer ( range 0 8 )
     let devastatorIndexer ( range 0 6 )
@@ -2298,6 +2459,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -2333,6 +2495,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -2403,6 +2566,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -2438,6 +2602,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -2508,6 +2673,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
@@ -2543,6 +2709,7 @@ to add-american-waves
         set flee false
         set teleport false
         set american true
+        set on_approach false
         ; Defence
         set breached false
         set group 4
