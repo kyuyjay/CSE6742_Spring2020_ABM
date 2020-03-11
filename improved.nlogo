@@ -978,12 +978,12 @@ to go
   retreat
   cleanup
   if count ships with [american = true] = 0 [
-    user-message "American Fleet Destroyed"
-    stop
+    ;user-message "American Fleet Destroyed"
+    ;stop
   ]
   if count ships with [american = false] = 0 [
-    user-message "Japanese Fleet Destroyed"
-    stop
+    ;user-message "Japanese Fleet Destroyed"
+    ;stop
   ]
   if ticks mod 2 = 0 [
     ask patches with [pxcor = -65 and pycor = 45] [
@@ -2789,10 +2789,10 @@ ticks
 30.0
 
 BUTTON
+130
+10
+193
 43
-44
-106
-77
 NIL
 setup\n
 NIL
@@ -2806,10 +2806,10 @@ NIL
 1
 
 BUTTON
-60
-166
-123
-199
+131
+48
+194
+81
 NIL
 go
 T
@@ -2823,10 +2823,10 @@ NIL
 1
 
 SLIDER
-11
-266
-183
-299
+3
+10
+124
+43
 toa
 toa
 0
@@ -2836,6 +2836,63 @@ toa
 1
 NIL
 HORIZONTAL
+
+PLOT
+0
+91
+200
+241
+CAP Count
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -2674135 true "" "let cap-japan-count 0\nset cap-japan-count count aircrafts with [offensive = false and american = false]\nplot cap-japan-count"
+"American" 1.0 0 -14730904 true "" "let cap-american-count 0\nset cap-american-count count aircrafts with [offensive = false and american = true]\nplot cap-american-count"
+
+PLOT
+1
+245
+201
+395
+Carrier Health
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -5298144 true "\n" "let total-health 0\nask ships with [class = 0 and american = false][\nset total-health total-health + hp\n]\nplot total-health"
+"American" 1.0 0 -7500403 true "" "let total-health 0\nask ships with [class = 0 and american = true][\nset total-health total-health + hp\n]\nplot total-health"
+
+PLOT
+5
+402
+205
+552
+Total Aircraft Remaining 
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -5298144 true "" "let total-aircraft 0 \nask ships with [american = false and class = 0] [\nset total-aircraft curr_attk_planes + total-aircraft\nset total-aircraft total-aircraft + max_cap\n\n]\nset total-aircraft total-aircraft + count aircrafts with [american = false]\nplot total-aircraft"
+"Union" 1.0 0 -14730904 true "" "let total-aircraft 0 \nask ships with [american = true and class = 0] [\nset total-aircraft curr_attk_planes + total-aircraft\nset total-aircraft total-aircraft + max_cap\n]\nset total-aircraft total-aircraft + count aircrafts with [american = true]\nplot total-aircraft"
 
 @#$#@#$#@
 ## WHAT IS IT?
