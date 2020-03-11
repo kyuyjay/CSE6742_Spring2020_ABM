@@ -1765,7 +1765,7 @@ to midway-wave
     ]
 end
 
-to add_midway_waves
+to add-midway-waves
   let wave_2 75	* (60 / tick-rate)
   let wave_3 98 * (60 / tick-rate)
   let wave_4 115 * (60 / tick-rate)
