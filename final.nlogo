@@ -68,6 +68,10 @@ globals [
   japanese_launch_wait_time
   japanese_launch_check_time
   japanese_minimum_wave_size
+  hits_scored_by_americans
+  hits_scored_by_japanese
+  number_japanese_craft_lost
+  number_american_craft_lost
 ]
 
 turtles-own [
@@ -315,6 +319,11 @@ to setup-params
   set patch-length 1
   set teleport_time 200
 
+  set hits_scored_by_americans 0
+  set hits_scored_by_japanese 0
+  set number_japanese_craft_lost 0
+  set number_american_craft_lost 0
+
   let flight-ranges-km [435 1115 1000 1000 2000 880 1100 0 0 0 840 608 1000 1162 0 0 0 0 0 0 0 0]
   let flight-speed-kmh [205 296	245	426	291	248	0	0	0	0	294	258 0	331	0	0	0	0	0	0	0	0]
   let approach-speed-kmh [185	153	185	185	291	248	0	0	0	0	294	333	0	331	0	0	0	0	0	0	0	0]
@@ -524,7 +533,7 @@ to setup-teleport
 end
 
 to init-jap-fleet
-  print "init"
+  ;print "init"
   ; CAP
   create-zeros 11 [
     setxy 100 0
@@ -1564,6 +1573,7 @@ to go
   cleanup
   if count ships with [american = true and class = 0] = 0 [
     ask aircrafts with [offensive = false and american = true] [
+      set number_american_craft_lost number_american_craft_lost + 1
       die
     ]
     ask aircrafts with [offensive = true and american = false] [
@@ -1575,7 +1585,11 @@ to go
     ]
   ]
   if count ships with [american = false and class = 0] = 0 [
-    user-message "Japanese Carriers Destroyed"
+    ;user-message "Japanese Carriers Destroyed"
+    stop
+  ]
+  if count ships with [american = true and class = 0] = 0 [
+    ;user-message "American Carriers Destroyed"
     stop
   ]
   if ticks mod 2 = 0 [
@@ -1642,12 +1656,12 @@ to build-teleport
       ]
     ]
     let dist (teleport_time / item 0 teleport_times) * max_teleport_dist
-    print dist
+    ;print dist
     ask patches with [pxcor < (0 - dist) or pxcor > dist] [
       set pcolor blue;
     ]
     set teleport_phase teleport_phase - 1
-    print teleport_phase
+    ;print teleport_phase
   ]
   ask patches with [pxcor = 10 and pycor = -40] [
     set plabel "Time between fleets: "
@@ -1690,19 +1704,39 @@ to cleanup
   ask aircrafts with [flight_range <= 0][
     ; print "died due to range"
     die
+    ifelse american = true [
+      set number_american_craft_lost number_american_craft_lost + 1
+    ][
+      set number_japanese_craft_lost number_japanese_craft_lost + 1
+    ]
   ]
   ask turtles [
     if hp <= 0 [
       die
+      ifelse american = true and ship = false[
+        set number_american_craft_lost number_american_craft_lost + 1
+      ][
+        set number_japanese_craft_lost number_japanese_craft_lost + 1
+      ]
     ]
     if not any? battle-neighbors [;'
       set engaged false
     ]
     if ycor < -47 [
       die
+      ifelse american = true and ship = false[
+        set number_american_craft_lost number_american_craft_lost + 1
+      ][
+        set number_japanese_craft_lost number_japanese_craft_lost + 1
+      ]
     ]
     if xcor > 190 and american = true [
       die
+      ifelse american = true and ship = false[
+        set number_american_craft_lost number_american_craft_lost + 1
+      ][
+        set number_japanese_craft_lost number_japanese_craft_lost + 1
+      ]
     ]
   ]
   ask motherships [hide-link]
@@ -1719,6 +1753,11 @@ to disengage
       set flee true
       if random 100 > p_escape and class = 1 [
         die
+        ifelse american = true and ship = false[
+          set number_american_craft_lost number_american_craft_lost + 1
+        ][
+          set number_japanese_craft_lost number_japanese_craft_lost + 1
+        ]
       ]
     ]
   ]
@@ -1781,8 +1820,15 @@ to engage
 ;          print [idx] of target
 ;        ]
         if random 100 < (matrix:get p-hit idx [idx] of target) [
-          print "HITHITHIT"
+          ;print "HITHITHIT"
           ; Triangular Distribution
+          ;TODO HEY CHRIS RIGHT HERE
+          ifelse american = true [
+            set hits_scored_by_americans hits_scored_by_americans + 1
+          ][
+            set hits_scored_by_japanese hits_scored_by_japanese + 1
+          ]
+
           let dmg 0
           let F (matrix:get p-dmg idx [idx] of target) / 100
           let U random-float 1
@@ -1797,12 +1843,13 @@ to engage
             set hp hp - (dmg * [max_hp] of target / 100)
             if class = 0 and random 100 < p_fire * (curr_attk_planes / max_attk_planes) [
               set fire true
-              print "FIREFIREFIRE"
+              ;print "FIREFIREFIRE"
             ]
           ]
         ]
         if class = 0 [
-          print("dropped bomb")
+          ;print("dropped bomb")
+          ;Bombs dropped
           set v item idx fleet-v
           set flee true
           set on_approach false
@@ -1846,16 +1893,21 @@ to move
       let evading [evade] of  mamashipero
       face mamashipero
       if evading = false and count out-mothership-neighbors in-radius 4 > 0 [
-       ifelse offensive = false [
-         ask mamashipero [
+        ifelse offensive = false [
+          ask mamashipero [
             set max_cap max_cap + 1
           ]
         ][
-           ask mamashipero [
+          ask mamashipero [
             set curr_attk_planes curr_attk_planes + 1
           ]
         ]
-       die
+        die
+        ifelse american = true [
+          set number_american_craft_lost number_american_craft_lost + 1
+        ][
+          set number_japanese_craft_lost number_japanese_craft_lost + 1
+        ]
       ]
     ][
       if offensive = true [
@@ -2308,7 +2360,8 @@ to add_attack_waves
           let b5ns_to_launch  round(ratio * ratio_b5n * curr_attk_planes / 100) ; divide by 100 because ship ratios are in non decimal amounts
           let zeros_to_launch round(ratio * ratio_zero * curr_attk_planes / 100)
           let d3as_to_launch round(ratio * ratio_d3a * curr_attk_planes / 100)
-          print("wave launch")
+          ;print("wave launch")
+          ;"Waves Launched"
           ; Use a minimum to ensure that rounding doesn't somehow cause us to exceed the number of attack planes
           ; While it shouldn't be possible, better safe
           let total_planes_to_launch min(list (d3as_to_launch + zeros_to_launch  + b5ns_to_launch) curr_attk_planes)
@@ -3098,7 +3151,7 @@ toa
 toa
 0
 270
-75.0
+100.0
 1
 1
 NIL
@@ -3530,6 +3583,27 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="4" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2000"/>
+    <metric>count turtles with [ship = false and american = true]</metric>
+    <metric>count turtles with [ship = false and american = false]</metric>
+    <metric>hits_scored_by_americans</metric>
+    <metric>hits_scored_by_japanese</metric>
+    <metric>number_japanese_craft_lost</metric>
+    <metric>number_american_craft_lost</metric>
+    <metric>count turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>count turtles with [class = 0 and american = true and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = true and ship = true]</metric>
+    <enumeratedValueSet variable="toa">
+      <value value="75"/>
+      <value value="100"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
