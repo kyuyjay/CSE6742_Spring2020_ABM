@@ -387,25 +387,25 @@ to setup-params
 
   set fleet-hp [100	100	100	100	100	100	0	100	100	100	100	100	0	100	100	100	100	100	100	100	100	100]
   set fleet-thresh [20	20	20	20	20	20	0	20	20	20	20	20	0	20	20	20	20	20	20	20	20	20]
-  set fleet-escape [0	0	0	0	0	0 0	0	0	0	0	0	0	0 0	0	0	0	0	0	0	0] ; TEMP
+  set fleet-escape [90	90	90	90	90	90	0	0	0	0	90	90	0	90	0	0	0	0	0	0	0	0]
 
-  set fleet-cap [0	0	0	0	0	0 0	20	20	20	0	0	0	0 20	20	20	20	0	0	0	0] ; TEMP
-  set fleet-cap-commit [0	0	0	0	0	0 0	50	50	50	0	0	0	0 50	50	50	50	0	0	0	0] ; TEMP
+  set fleet-cap [0	0	0	0	0	0	0	18	0	0	0	0	0	0	4	4	5	5	0	0	0	0]
+  set fleet-cap-commit [80	80	80	80	80	80	0	80	80	80	80	80	0	80	80	80	80	80	80	80	80	80]
 
   set amagi-attk [20 20 50 30] ; TEMP
   set tosa-attk [20 20 50 30] ; TEMP
   set hiryu-attk [20 20 50 30] ; TEMP
   set soryu-attk [20 20 50 30] ; TEMP
 
-  set r_global_amer 80 ; TEMP
-  set r_global_jap 80 ; TEMP
+  set r_global_amer 50 ; TEMP
+  set r_global_jap 50 ; TEMP
 
   set p_fire 60
   set fire_dmg 0.1 * 60 * tick-rate ; TEMP
 
-  set japanese_launch_progress_per_tick .2 ; How many planes launched per tick ; TEMP
+  set japanese_launch_progress_per_tick 1 ; How many planes launched per tick ; TEMP
   set japanese_launch_wait_time 10 / (tick-rate / 60) ; how many ticks to wait for stuff
-  set japanese_launch_check_time 10 / (tick-rate / 60)  ; just a variable for how long it takes to reset
+  set japanese_launch_check_time 5 / (tick-rate / 60)  ; just a variable for how long it takes to reset
   set japanese_minimum_wave_size 4 ; just a var for now
 end
 
@@ -437,7 +437,7 @@ to setup-p
 
   set p-hit matrix:from-row-list [
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];0 tbd_devs
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 50 0 50 50 0 0 0 0];1 sbd_daunts
+                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 80 80 20 20 0 0 0 0];1 sbd_daunts
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];2 tbf_aves
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];3 b26s
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];4 b17s
@@ -463,7 +463,7 @@ to setup-p
 
   set p-dmg matrix:from-row-list [
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	20 100	0	100	100	0	0	0	0];0 tbd_devs
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0];1 sbd_daunts
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	38	38	38	38	0	0	0	0];1 sbd_daunts
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0];2 tbf_aves
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	40	50	0	50	50	0	0	0	0];3 b26s
                               [0	0	0	0	0	0	0	0	0	0	0	0	0	100	50	0	50	50	0	0	0	0];4 b17s
@@ -1066,7 +1066,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1103,7 +1103,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1140,7 +1140,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1177,7 +1177,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1214,7 +1214,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1251,7 +1251,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1288,7 +1288,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1325,7 +1325,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1362,7 +1362,7 @@ to init-amer-fleet
     set color grey
     set size 3
     set heading 90
-    set idx idx_yorktowns
+    set idx idx_adestroyers
     ; Personal Parameters
     set v item idx fleet-v
     set hp item idx fleet-hp
@@ -1562,12 +1562,20 @@ to go
   ; in-yorktown
   retreat
   cleanup
-  if count ships with [american = true] = 0 [
-    user-message "American Fleet Destroyed"
-    stop
+  if count ships with [american = true and class = 0] = 0 [
+    ask aircrafts with [offensive = false and american = true] [
+      die
+    ]
+    ask aircrafts with [offensive = true and american = false] [
+      set flee true
+      set p_escape 100
+    ]
+    ask ships with [american = true] [
+      die
+    ]
   ]
-  if count ships with [american = false] = 0 [
-    user-message "Japanese Fleet Destroyed"
+  if count ships with [american = false and class = 0] = 0 [
+    user-message "Japanese Carriers Destroyed"
     stop
   ]
   if ticks mod 2 = 0 [
@@ -1642,11 +1650,11 @@ to build-teleport
     print teleport_phase
   ]
   ask patches with [pxcor = 10 and pycor = -40] [
-    set plabel "Distance between fleets: "
+    set plabel "Time between fleets: "
     set plabel-color black
   ]
   ask patches with [pxcor = 10 and pycor = -45] [
-    set plabel teleport_time
+    set plabel teleport_time / 2
     set plabel-color black
   ]
 end
@@ -1693,7 +1701,7 @@ to cleanup
     if ycor < -47 [
       die
     ]
-    if xcor > 60 and american = true [
+    if xcor > 190 and american = true [
       die
     ]
   ]
@@ -1720,7 +1728,7 @@ to engage
   ;print "engage"
   ask ships with [class = 0] [
     ifelse american = true [
-      ifelse fire = false and count (aircrafts with [american = false and distancexy -150 0 < r_global_amer]) > 0 [
+      ifelse fire = false and count (aircrafts with [american = false and distancexy -100 0 < r_global_amer]) > 0 [
         set evade true
         set color grey
       ][
@@ -1729,7 +1737,7 @@ to engage
       ]
     ]
     [
-      ifelse fire = false and count (aircrafts with [american = true and distancexy 0 0 < r_global_jap]) > 0 [
+      ifelse fire = false and count (aircrafts with [american = true and distancexy 100 0 < r_global_jap]) > 0 [
         set evade true
         set color grey
       ][
@@ -2052,7 +2060,7 @@ to spawn
       ]
     ]
   ]
-  foreach sort ships with [spawn_rate > 0 and max_cap > 0 and ticks mod spawn_rate = 0 and (ticks < 165 or ticks > 195) ] [one-ship ->
+  foreach sort ships with [class = 0 and spawn_rate > 0 and max_cap > 0 and ticks mod spawn_rate = 0 and (ticks < 165 or ticks > 195) ] [one-ship ->
     let x 0
     let y 0
     let one-cap 0
@@ -2231,7 +2239,7 @@ end
 to teleports
   ask turtles with [offensive = true] [
     if [pcolor] of patch-here = white [
-      set xcor -70
+      set xcor 0
       if curr_tick = -1 [
         set curr_tick ticks
         set teleport true
@@ -2246,7 +2254,13 @@ to teleports
           die
         ]
       ]
-      if ticks - curr_tick > teleport_time [
+      if ticks - curr_tick > teleport_time + 50 and class = 0[
+        let dist (teleport_time / item 0 teleport_times) * max_teleport_dist
+        jump dist * 2
+        set curr_tick -1
+        set teleport false
+      ]
+      if ticks - curr_tick > teleport_time and class = 1[
         let dist (teleport_time / item 0 teleport_times) * max_teleport_dist
         jump dist * 2
         set curr_tick -1
@@ -2527,7 +2541,7 @@ to add-midway-waves
   let wave_5 147 * (60 / tick-rate)
   if ticks = wave_2 [
     create-tbf_aves 6 [
-      setxy -45 -45
+      setxy 30 -45
       set color yellow
       set size 3
       ; Personal Parameters
@@ -2558,7 +2572,7 @@ to add-midway-waves
       set flight_range item idx flight-range-ticks
     ]
     create-b26s 4 [
-      setxy -45 -45
+      setxy 32 -45
       set color yellow
       set size 3
       ; Personal Parameters
@@ -2596,8 +2610,8 @@ to add-midway-waves
     let bombIndexer ( range 0 5 )
 
     foreach bombIndexer [ ind ->
-      let ycoord (-24 + 1 * ind)
-      let xcoord (35 + 2 * ind)
+      let ycoord (-40 + 1 * ind)
+      let xcoord (50 + 2 * ind)
       create-sbd_daunts 16 [
         setxy xcoord ycoord
         set color yellow
@@ -2641,7 +2655,7 @@ to add-midway-waves
 
     foreach bombIndexer [ ind ->
       let ycoord (30 + 1 * ind)
-      let xcoord (42 + 2 * ind)
+      let xcoord (30 + 2 * ind)
       create-sbd_daunts 11 [
         setxy xcoord ycoord
         set color yellow
@@ -2682,25 +2696,25 @@ end
 
 to add-american-waves
   let wave_1 540
-  if ticks = wave_1[
+  if ticks = wave_1 [
     let indexer ( range 0 8 )
     let devastatorIndexer ( range 0 6 )
     let dauntlessIndexer ( range 0 16 )
 
     foreach dauntlessIndexer [ ind ->
       let ycoord (-40 + (1 * ind) mod 6)
-      let xcoord (-20 + (2 * ind) mod 6)
+      let xcoord (25 + (2 * ind) mod 6)
       create-sbd_daunts 1 [
         setxy xcoord ycoord
         set color orange
         set size 3
+        set idx idx_sbd_daunts
         ; Personal Parameters
         set v 1
         set hp 30
         set max_hp 30
         set flee_thresh 5
         set p_escape 50
-        set idx idx_sbd_daunts
         ; Radii
         set r_detect 20
         set r_engage 5
@@ -2725,18 +2739,18 @@ to add-american-waves
     ]
     foreach devastatorIndexer [ ind ->
       let ycoord (-38 + (2 * ind) mod 6)
-      let xcoord (-20 + (1 * ind) mod 6)
+      let xcoord (25 + (1 * ind) mod 6)
       create-tbd_devs 1 [
         setxy xcoord ycoord
         set color red
         set size 3
+        set idx idx_tbd_devs
         ; Personal Parameters
         set v 1
         set hp 30
         set max_hp 30
         set flee_thresh 5
         set p_escape 50
-        set idx idx_tbd_devs
         ; Radii
         set r_detect 20
         set r_engage 5
@@ -2761,7 +2775,7 @@ to add-american-waves
     ]
     foreach indexer [ ind ->
       let ycoord (-40 + (1 * ind) mod 6)
-      let xcoord (-20 + (1 * ind) mod 6)
+      let xcoord (50 + (1 * ind) mod 6)
       create-f4fs 1 [
         setxy xcoord ycoord
         set color white
@@ -2796,7 +2810,7 @@ to add-american-waves
     ]
     foreach dauntlessIndexer [ ind ->
       let ycoord (37 + (1 * ind) mod 6)
-      let xcoord (-20 + (2 * ind) mod 6)
+      let xcoord (30 + (2 * ind) mod 6)
       create-sbd_daunts 1 [
         setxy xcoord ycoord
         set color orange
@@ -2832,7 +2846,7 @@ to add-american-waves
     ]
     foreach devastatorIndexer [ ind ->
       let ycoord (38 + (2 * ind) mod 6)
-      let xcoord (-20 + (1 * ind) mod 6)
+      let xcoord (30 + (1 * ind) mod 6)
       create-tbd_devs 1 [
         setxy xcoord ycoord
         set color red
@@ -2868,7 +2882,7 @@ to add-american-waves
     ]
     foreach indexer [ ind ->
       let ycoord (35 + (1 * ind) mod 6)
-      let xcoord (-20 + (1 * ind) mod 6)
+      let xcoord (40 + (1 * ind) mod 6)
       create-f4fs 1 [
         setxy xcoord ycoord
         set color white
@@ -3042,10 +3056,10 @@ ticks
 30.0
 
 BUTTON
-43
+12
+11
+75
 44
-106
-77
 NIL
 setup\n
 NIL
@@ -3059,10 +3073,10 @@ NIL
 1
 
 BUTTON
-60
-166
-123
-199
+135
+10
+198
+43
 NIL
 go
 T
@@ -3076,19 +3090,76 @@ NIL
 1
 
 SLIDER
-11
-266
-183
-299
+16
+49
+188
+82
 toa
 toa
 0
-100
-0.0
+270
+75.0
 1
 1
 NIL
 HORIZONTAL
+
+PLOT
+3
+87
+203
+237
+CAP Count
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -5298144 true "" "let cap-japan-count 0\nset cap-japan-count count aircrafts with [offensive = false and american = false]\nplot cap-japan-count"
+"Union" 1.0 0 -15390905 true "" "let cap-american-count 0\nset cap-american-count count aircrafts with [offensive = false and american = true]\nplot cap-american-count\n"
+
+PLOT
+3
+238
+203
+388
+Carrier Health
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -8053223 true "" "let total-health 0\nask ships with [class = 0 and american = false][\nset total-health total-health + hp\n]\nplot total-health"
+"Union" 1.0 0 -15390905 true "" "let total-health 0\nask ships with [class = 0 and american = true][\nset total-health total-health + hp\n]\nplot total-health"
+
+PLOT
+2
+388
+202
+538
+ Total Aircraft Remaining
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Japanese" 1.0 0 -8053223 true "" "let total-aircraft 0 \nask ships with [american = false and class = 0] [\nset total-aircraft curr_attk_planes + total-aircraft\nset total-aircraft total-aircraft + max_cap\n\n]\nset total-aircraft total-aircraft + count aircrafts with [american = false]\nplot total-aircraft"
+"Union" 1.0 0 -15390905 true "" "let total-aircraft 0 \nask ships with [american = true and class = 0] [\nset total-aircraft curr_attk_planes + total-aircraft\nset total-aircraft total-aircraft + max_cap\n]\nset total-aircraft total-aircraft + count aircrafts with [american = true]\nplot total-aircraft"
 
 @#$#@#$#@
 ## WHAT IS IT?
