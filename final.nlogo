@@ -445,44 +445,44 @@ to setup-p
                                                                                        ]
 
   set p-hit matrix:from-row-list [
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];0 tbd_devs
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 80 80 20 20 0 0 0 0];1 sbd_daunts
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 5 1 0 1 1 1 1 1 1];2 tbf_aves
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];3 b26s
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 20 1 0 1 1 0 0 0 0];4 b17s
-                              [0 0 0 0 0 0 0 0 0 0 30 40 0 10 0 0 0 0 0 0 0 0];5 f4fs
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];6 f2as
-                              [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];7 yorktowns
-                              [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];8 acruisers
-                              [0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0];9 adestroyers
-                              [0 0 0 0 0 20 0 60 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-                              [0 0 0 0 0 20 0 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
-                              [60 40 60 60 80 20 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];13 zeros
-                              [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];14 amagis
-                              [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];15 tosas
-                              [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];16 hiryus
-                              [2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];17 soryus
-                              [1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];18 kongos
-                              [1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];19 tones
-                              [1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];20 nagaras
-                              [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];21 kageros
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	5	1	1	1	1	0	0	0	0];0 tbd_devs
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	5	15 15	15	15	0	0	0	0];1 sbd_daunts
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	5	1	1	1	1	0	0	0		0];2 tbf_aves
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	10	1	1	1	1	0	0	0		0];3 b26s
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	1	1	1	1	0	0	0		0];4 b17s
+                              [0	0	0	0	0	0	0	0	0	0	30	40	0	10	0	0	0	0	0	0	0		0];5 f4fs
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];6 f2as
+                              [0	0	0	0	0	0	0	0	0	0	6	6	6	6	0	0	0	0	0	0	0		0];7 yorktowns
+                              [0	0	0	0	0	0	0	0	0	0	6	6	6	6	0	0	0	0	0	0	0		0];8 acruisers
+                              [0	0	0	0	0	0	0	0	0	0	6	6	6	6	0	0	0	0	0	0	0		0];9 adestroyers
+                              [0	0	0	0	0	20	0	60	0	0	0	0	0	0	0	0	0	0	0	0 0	0	];10 d3as
+                              [0	0	0	0	0	20	0	20	0	0	0	0	0	0	0	0	0	0	0	0	0		0];11 b5ns
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];12 d4ys
+                              [60	40	60	60	80 20	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];13 zeros
+                              [2	2	2	2	2	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];14 amagis
+                              [2	2	2	2	2	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];15 tosas
+                              [2	2	2	2	2	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];16 hiryus
+                              [2	2	2	2	2	2	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];17 soryus
+                              [1	1	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];18 kongos
+                              [1	1	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];19 tones
+                              [1	1	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0		0];20 nagaras
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];21 kageros
                                                                                        ]
 
 
   set p-dmg matrix:from-row-list [
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20 100	0	100	100	0	0	0	0];0 tbd_devs
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	38	38	38	38	0	0	0	0];1 sbd_daunts
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0];2 tbf_aves
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	40	50	0	50	50	0	0	0	0];3 b26s
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	100	50	0	50	50	0	0	0	0];4 b17s
-                              [0	0	0	0	0	0	0	0	0	0	80	80	0	100	0	0	0	0	0	0	0	0];5 f4fs
-                              [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];6 f2as
-                              [0	0	0	0	0	0	0	0	0	0	60 60	60 60	0	0	0	0	0	0	0	0];7 yorktowns
-                              [0	0	0	0	0	0	0	0	0	0	60 60	60 60	0	0	0	0	0	0	0	0];8 acruisers
-                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0];9 adestroyers
-                              [0 0 0 0 0 5 0 70 0 0 0 0 0 0 0 0 0 0 0 0 0 0];10 d3as
-                              [0 0 0 0 0 5 0 100 0 0 0 0 0 0 0 0 0 0 0 0 0 0];11 b5ns
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0	];0 tbd_devs
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0	];1 sbd_daunts
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	20	100	0	100	100	0	0	0	0	];2 tbf_aves
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	40	50	0	50	50	0	0	0	0	];3 b26s
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	100	50	0	50	50	0	0	0	0	];4 b17s
+                              [0	0	0	0	0	0	0	0	0	0	80	80	0	100	0	0	0	0	0	0	0	0	];5 f4fs
+                              [0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	];6 f2as
+                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0	];7 yorktowns
+                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0	];8 acruisers
+                              [0	0	0	0	0	0	0	0	0	0	60	60	60	60	0	0	0	0	0	0	0	0	];9 adestroyers
+                              [0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	];10 d3as
+                              [0	0	0	0	0	5	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	];11 b5ns
                               [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0];12 d4ys
                               [30	30	30	10	5	50	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];13 zeros
                               [20	20	20	20	20	20 0 0	0	0	0	0	0	0	0	0	0	0	0	0	0	0];14 amagis
@@ -1586,12 +1586,12 @@ to go
   ]
   if count ships with [american = false and class = 0] = 0 [
     ;user-message "Japanese Carriers Destroyed"
-    stop
+    ;stop
   ]
-  if count ships with [american = true and class = 0] = 0 [
+  ;if count ships with [american = true and class = 0] = 0 [
     ;user-message "American Carriers Destroyed"
-    stop
-  ]
+    ;stop
+  ;]
   if ticks mod 2 = 0 [
     ask patches with [pxcor = 10 and pycor = 45] [
       set plabel "Time to Iron Fist"
@@ -1703,40 +1703,35 @@ to cleanup
   ]
   ask aircrafts with [flight_range <= 0][
     ; print "died due to range"
-    die
     ifelse american = true [
       set number_american_craft_lost number_american_craft_lost + 1
     ][
       set number_japanese_craft_lost number_japanese_craft_lost + 1
     ]
+    die
   ]
   ask turtles [
     if hp <= 0 [
-      die
       ifelse american = true and ship = false[
         set number_american_craft_lost number_american_craft_lost + 1
       ][
         set number_japanese_craft_lost number_japanese_craft_lost + 1
       ]
+      die
     ]
     if not any? battle-neighbors [;'
       set engaged false
     ]
     if ycor < -47 [
+      ;ifelse american = true and ship = false[
+       ; set number_american_craft_lost number_american_craft_lost + 1
+      ;][
+      ;  set number_japanese_craft_lost number_japanese_craft_lost + 1
+      ;]
       die
-      ifelse american = true and ship = false[
-        set number_american_craft_lost number_american_craft_lost + 1
-      ][
-        set number_japanese_craft_lost number_japanese_craft_lost + 1
-      ]
     ]
     if xcor > 190 and american = true [
       die
-      ifelse american = true and ship = false[
-        set number_american_craft_lost number_american_craft_lost + 1
-      ][
-        set number_japanese_craft_lost number_japanese_craft_lost + 1
-      ]
     ]
   ]
   ask motherships [hide-link]
@@ -1752,12 +1747,12 @@ to disengage
       set engaged false
       set flee true
       if random 100 > p_escape and class = 1 [
-        die
         ifelse american = true and ship = false[
           set number_american_craft_lost number_american_craft_lost + 1
         ][
           set number_japanese_craft_lost number_japanese_craft_lost + 1
         ]
+        die
       ]
     ]
   ]
@@ -1902,12 +1897,12 @@ to move
             set curr_attk_planes curr_attk_planes + 1
           ]
         ]
-        die
         ifelse american = true [
           set number_american_craft_lost number_american_craft_lost + 1
         ][
           set number_japanese_craft_lost number_japanese_craft_lost + 1
         ]
+        die
       ]
     ][
       if offensive = true [
@@ -3150,8 +3145,8 @@ SLIDER
 toa
 toa
 0
-270
-100.0
+2000
+510.0
 1
 1
 NIL
@@ -3584,7 +3579,7 @@ NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="experiment" repetitions="4" runMetricsEveryStep="false">
+  <experiment name="experiment" repetitions="30" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="2000"/>
@@ -3599,8 +3594,77 @@ NetLogo 6.1.1
     <metric>count turtles with [class = 0 and american = true and ship = true]</metric>
     <metric>sum [hp] of turtles with [class = 0 and american = true and ship = true]</metric>
     <enumeratedValueSet variable="toa">
-      <value value="75"/>
-      <value value="100"/>
+      <value value="60"/>
+      <value value="180"/>
+      <value value="2000"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment3" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>count turtles with [ship = false and american = true]</metric>
+    <metric>count turtles with [ship = false and american = false]</metric>
+    <metric>hits_scored_by_americans</metric>
+    <metric>hits_scored_by_japanese</metric>
+    <metric>number_japanese_craft_lost</metric>
+    <metric>number_american_craft_lost</metric>
+    <metric>count turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>count turtles with [class = 0 and american = true and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = true and ship = true]</metric>
+    <enumeratedValueSet variable="toa">
+      <value value="30"/>
+      <value value="60"/>
+      <value value="90"/>
+      <value value="120"/>
+      <value value="150"/>
+      <value value="180"/>
+      <value value="210"/>
+      <value value="240"/>
+      <value value="270"/>
+      <value value="300"/>
+      <value value="330"/>
+      <value value="360"/>
+      <value value="390"/>
+      <value value="420"/>
+      <value value="450"/>
+      <value value="480"/>
+      <value value="510"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="daunts_nerfed 20%" repetitions="5" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="1000"/>
+    <metric>count turtles with [ship = false and american = true]</metric>
+    <metric>count turtles with [ship = false and american = false]</metric>
+    <metric>hits_scored_by_americans</metric>
+    <metric>hits_scored_by_japanese</metric>
+    <metric>number_japanese_craft_lost</metric>
+    <metric>number_american_craft_lost</metric>
+    <metric>count turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = false and ship = true]</metric>
+    <metric>count turtles with [class = 0 and american = true and ship = true]</metric>
+    <metric>sum [hp] of turtles with [class = 0 and american = true and ship = true]</metric>
+    <enumeratedValueSet variable="toa">
+      <value value="30"/>
+      <value value="60"/>
+      <value value="90"/>
+      <value value="120"/>
+      <value value="150"/>
+      <value value="180"/>
+      <value value="210"/>
+      <value value="240"/>
+      <value value="270"/>
+      <value value="300"/>
+      <value value="330"/>
+      <value value="360"/>
+      <value value="390"/>
+      <value value="420"/>
+      <value value="450"/>
+      <value value="480"/>
+      <value value="510"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
